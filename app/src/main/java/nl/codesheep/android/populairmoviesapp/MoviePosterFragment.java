@@ -1,6 +1,7 @@
 package nl.codesheep.android.populairmoviesapp;
 
 import android.content.SharedPreferences;
+import android.media.Rating;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
  */
 public class MoviePosterFragment extends Fragment {
 
-    private ImageAdapter mPosterAdapter;
+    private MovieAdapter mMovieAdapter;
 
     public MoviePosterFragment() {
 
@@ -41,10 +42,10 @@ public class MoviePosterFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mPosterAdapter = new ImageAdapter(getActivity(), new ArrayList<String>());
+        mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
         GridView gridView = (GridView) rootView.findViewById(R.id.movie_grid_view);
-        gridView.setAdapter(mPosterAdapter);
+        gridView.setAdapter(mMovieAdapter);
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -62,13 +63,13 @@ public class MoviePosterFragment extends Fragment {
         new FetchMoviePostersTask().execute();
     }
 
-    private class FetchMoviePostersTask extends AsyncTask<Void, Void, String[]> {
+    private class FetchMoviePostersTask extends AsyncTask<Void, Void, Movie[]> {
 
         private final String LOG_TAG = FetchMoviePostersTask.class.getSimpleName();
         private String apiKey = getString(R.string.api_key);
 
         @Override
-        protected String[] doInBackground(Void... params) {
+        protected Movie[] doInBackground(Void... params) {
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -128,7 +129,7 @@ public class MoviePosterFragment extends Fragment {
             }
 
             try {
-                return getMoviePostersFromJson(popularMoviesStr);
+                return getMoviesFromJson(popularMoviesStr);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Could not convert to JSON", e);
             }
@@ -136,29 +137,43 @@ public class MoviePosterFragment extends Fragment {
             return null;
         }
 
-        private String[] getMoviePostersFromJson(String popularMoviesJsonStr) throws JSONException {
+        private Movie[] getMoviesFromJson(String popularMoviesJsonStr) throws JSONException {
             final String KEY_RESULTS = "results";
+            final String KEY_TITLE = "title";
+            final String KEY_SYNOPSIS = "overview";
             final String KEY_POSTER = "poster_path";
+            final String KEY_RELEASE_DATE = "release_date";
+            final String KEY_RATING = "vote_average";
             final String POSTER_PATH = "http://image.tmdb.org/t/p/w185";
 
             JSONObject popularMoviesJson = new JSONObject(popularMoviesJsonStr);
             JSONArray moviesJsonArray = popularMoviesJson.getJSONArray(KEY_RESULTS);
 
-            String[] posters = new String[moviesJsonArray.length()];
-            for (int i = 0; i < posters.length; i++) {
+            Movie[] movies = new Movie[moviesJsonArray.length()];
+            for (int i = 0; i < movies.length; i++) {
                 JSONObject movieJson = moviesJsonArray.getJSONObject(i);
-                String posterUrl = movieJson.getString(KEY_POSTER);
-                posters[i] = POSTER_PATH + posterUrl;
+                String title = movieJson.getString(KEY_TITLE);
+                String posterUrl = POSTER_PATH + movieJson.getString(KEY_POSTER);
+                String synopsis = movieJson.getString(KEY_SYNOPSIS);
+                double rating = movieJson.getDouble(KEY_RATING);
+                String releaseDate = movieJson.getString(KEY_RELEASE_DATE);
+                movies[i] = new Movie(
+                        title,
+                        posterUrl,
+                        synopsis,
+                        rating,
+                        releaseDate
+                );
             }
 
-            return posters;
+            return movies;
         }
 
         @Override
-        protected void onPostExecute(String[] posters) {
-            if (posters != null) {
-                mPosterAdapter.clear();
-                mPosterAdapter.addAll(posters);
+        protected void onPostExecute(Movie[] movies) {
+            if (movies != null) {
+                mMovieAdapter.clear();
+                mMovieAdapter.addAll(movies);
             }
         }
     }

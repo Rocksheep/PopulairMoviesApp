@@ -11,11 +11,11 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class ImageAdapter extends ArrayAdapter<String> {
-    private final String LOG_TAG = ImageAdapter.class.getSimpleName();
+public class MovieAdapter extends ArrayAdapter<Movie> {
+    private final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
-    public ImageAdapter(Context context, List<String> posters) {
-        super(context, 0, posters);
+    public MovieAdapter(Context context, List<Movie> movies) {
+        super(context, 0, movies);
     }
 
     @Override
@@ -24,7 +24,8 @@ public class ImageAdapter extends ArrayAdapter<String> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.movie_poster, parent, false);
         }
         ImageView imageView = (ImageView) convertView.findViewById(R.id.movie_poster_image_view);
-        Picasso.with(getContext()).load(getItem(position)).into(imageView);
+        String posterUrl = getItem(position).getPosterUrl();
+        Picasso.with(getContext()).load(posterUrl).into(imageView);
         return convertView;
     }
 
