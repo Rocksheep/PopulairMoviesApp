@@ -1,7 +1,7 @@
-package nl.codesheep.android.populairmoviesapp;
+package nl.codesheep.android.popularmoviesapp;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Rating;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -49,8 +49,11 @@ public class MoviePosterFragment extends Fragment {
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Movie movie = mMovieAdapter.getItem(position);
+                Intent movieDetailIntent = new Intent(getActivity(), MovieDetailActivity.class);
+                movieDetailIntent.putExtra("movie", movie);
+                startActivity(movieDetailIntent);
             }
         });
 
@@ -144,7 +147,9 @@ public class MoviePosterFragment extends Fragment {
             final String KEY_POSTER = "poster_path";
             final String KEY_RELEASE_DATE = "release_date";
             final String KEY_RATING = "vote_average";
+            final String KEY_COVER = "backdrop_path";
             final String POSTER_PATH = "http://image.tmdb.org/t/p/w185";
+            final String COVER_PATH = "http://image.tmdb.org/t/p/w780";
 
             JSONObject popularMoviesJson = new JSONObject(popularMoviesJsonStr);
             JSONArray moviesJsonArray = popularMoviesJson.getJSONArray(KEY_RESULTS);
@@ -154,12 +159,14 @@ public class MoviePosterFragment extends Fragment {
                 JSONObject movieJson = moviesJsonArray.getJSONObject(i);
                 String title = movieJson.getString(KEY_TITLE);
                 String posterUrl = POSTER_PATH + movieJson.getString(KEY_POSTER);
+                String coverUrl = COVER_PATH + movieJson.getString(KEY_COVER);
                 String synopsis = movieJson.getString(KEY_SYNOPSIS);
                 double rating = movieJson.getDouble(KEY_RATING);
                 String releaseDate = movieJson.getString(KEY_RELEASE_DATE);
                 movies[i] = new Movie(
                         title,
                         posterUrl,
+                        coverUrl,
                         synopsis,
                         rating,
                         releaseDate

@@ -1,15 +1,20 @@
 <resources>
-    <string name="app_name">Populair Movies App</string>
+    <string name="app_name">Popular Movies App</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
     <string name="title_activity_settings">Settings</string>
-    <string name="pref_order">Order</string>
+    <string name="pref_order">Sorting order</string>
     <string name="pref_order_label_popularity">Most popular</string>
     <string name="pref_order_label_rating">Highest rated</string>
     <string name="pref_order_popularity" translatable="false">popularity.desc</string>
     <string name="pref_order_rating" translatable="false">vote_average.desc</string>
     <string name="pref_order_default" translatable="false">@string/pref_order_popularity</string>
     <string name="pref_order_key" translatable="false">order</string>
+    <string name="title_activity_movie_detail">Movie Details</string>
+
+    <string name="movie_title">Title</string>
+    <string name="movie_release_date">2015-01-01</string>
+    <string name="movie_synopsis">Synopsis</string>
 
 </resources>

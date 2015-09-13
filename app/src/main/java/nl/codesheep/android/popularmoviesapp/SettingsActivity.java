@@ -1,4 +1,4 @@
-package nl.codesheep.android.populairmoviesapp;
+package nl.codesheep.android.popularmoviesapp;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;

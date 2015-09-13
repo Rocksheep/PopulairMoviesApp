@@ -1,4 +1,4 @@
-package nl.codesheep.android.populairmoviesapp;
+package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Context;
 import android.view.LayoutInflater;
