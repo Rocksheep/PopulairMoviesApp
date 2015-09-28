@@ -1,6 +1,8 @@
 package nl.codesheep.android.popularmoviesapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,8 +14,18 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import nl.codesheep.android.popularmoviesapp.data.Movie;
 import nl.codesheep.android.popularmoviesapp.data.MovieService;
+import nl.codesheep.android.popularmoviesapp.data.Review;
+import nl.codesheep.android.popularmoviesapp.rest.ReviewResponse;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.GsonConverterFactory;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -52,6 +64,9 @@ public class MovieDetailFragment extends Fragment {
             return rootView;
         }
 
+        ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
+        retrieveReviews(movie.getMovieId(), inflater, reviewContainer);
+
         ImageView coverImageView = (ImageView)
                 rootView.findViewById(R.id.detail_movie_cover_image_view);
 
@@ -71,6 +86,41 @@ public class MovieDetailFragment extends Fragment {
         ratingBar.setRating((float) movie.getRating() / 2);
 
         return rootView;
+    }
+
+    private void retrieveReviews(long movieId, final LayoutInflater inflater, final ViewGroup parent) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(MovieService.API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        MovieService.TheMovieDatabase service =
+                retrofit.create(MovieService.TheMovieDatabase.class);
+
+        String apiKey = getString(R.string.api_key);
+
+        Map<String, String> arguments = new HashMap<>();
+        arguments.put("api_key", apiKey);
+
+        Call<ReviewResponse> reviewResponseCall = service.reviews(movieId, arguments);
+        reviewResponseCall.enqueue(new Callback<ReviewResponse>() {
+            @Override
+            public void onResponse(Response<ReviewResponse> response) {
+                if(response.body() != null) {
+                    for (Review review : response.body().results) {
+                        View view = inflater.inflate(R.layout.review, parent, false);
+                        TextView textView = (TextView) view.findViewById(R.id.review_text_view);
+                        textView.setText(review.content);
+                        parent.addView(view);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        });
     }
 
 }
