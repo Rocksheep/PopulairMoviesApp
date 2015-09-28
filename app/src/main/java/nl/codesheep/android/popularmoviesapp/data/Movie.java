@@ -3,13 +3,26 @@ package nl.codesheep.android.popularmoviesapp.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Movie implements Parcelable {
 
+    @SerializedName("title")
     private String mTitle;
+
+    @SerializedName("poster_path")
     private String mPosterUrl;
+
+    @SerializedName("backdrop_path")
     private String mCoverUrl;
+
+    @SerializedName("overview")
     private String mSynopsis;
+
+    @SerializedName("vote_average")
     private double mRating;
+
+    @SerializedName("release_date")
     private String mReleaseDate;
 
     public Movie(String title, String posterUrl, String coverUrl, String synopsis, double rating, String releaseDate) {

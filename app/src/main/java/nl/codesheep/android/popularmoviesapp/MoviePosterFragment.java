@@ -14,6 +14,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.google.gson.GsonBuilder;
+import com.squareup.okhttp.Request;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,9 +34,13 @@ import java.util.List;
 import java.util.Map;
 
 import nl.codesheep.android.popularmoviesapp.data.Movie;
-import nl.codesheep.android.popularmoviesapp.data.TMDBService;
+import nl.codesheep.android.popularmoviesapp.data.MovieResponse;
+import nl.codesheep.android.popularmoviesapp.data.MovieService;
 import retrofit.Call;
+import retrofit.Callback;
 import retrofit.Converter;
+import retrofit.GsonConverterFactory;
+import retrofit.Response;
 import retrofit.Retrofit;
 
 /**
@@ -85,16 +92,12 @@ public class MoviePosterFragment extends Fragment {
         super.onStart();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://api.themoviedb.org/3")
-                .addConverterFactory(new Converter.Factory() {
-                    @Override
-                    public Converter<List<Movie>> get(Type type) {
-//                        type.
-                        return null;
-                    }
-                })
+                .baseUrl(MovieService.API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        TMDBService service = retrofit.create(TMDBService.class);
+
+        MovieService.TheMovieDatabase service =
+                retrofit.create(MovieService.TheMovieDatabase.class);
 
         String apiKey = getString(R.string.api_key);
 
@@ -106,138 +109,29 @@ public class MoviePosterFragment extends Fragment {
                 getString(R.string.pref_order_default)
         );
 
-//        .appendQueryParameter("sort_by", order)
-//        .appendQueryParameter("api_key", apiKey)
-//        .appendQueryParameter("vote_count.gte", "100")
-
         Map<String, String> arguments = new HashMap<>();
         arguments.put("sort_by", order);
         arguments.put("api_key", apiKey);
         arguments.put("vote_count.gte", "100");
 
-        Call<List<Movie>> movies = service.getMovies(arguments);
-//        new FetchMoviePostersTask().execute();
-    }
-
-    private class FetchMoviePostersTask extends AsyncTask<Void, Void, Movie[]> {
-
-        private final String LOG_TAG = FetchMoviePostersTask.class.getSimpleName();
-        private String apiKey = getString(R.string.api_key);
-
-        @Override
-        protected Movie[] doInBackground(Void... params) {
-
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String popularMoviesStr = null;
-            SharedPreferences preferences =
-                    PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-            String order = preferences.getString(
-                    getString(R.string.pref_order_key),
-                    getString(R.string.pref_order_default)
-            );
-
-            try {
-                Uri builtUri = Uri.parse("http://api.themoviedb.org/3/discover/movie")
-                        .buildUpon()
-                        .appendQueryParameter("sort_by", order)
-                        .appendQueryParameter("api_key", apiKey)
-                        .appendQueryParameter("vote_count.gte", "100")
-                        .build();
-
-                Log.d(LOG_TAG, builtUri.toString());
-                URL url = new URL(builtUri.toString());
-
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if(inputStream == null) {
-                    return null;
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                popularMoviesStr = buffer.toString();
-            }
-            catch (IOException e) {
-                Log.e(LOG_TAG, "Error: ", e);
-                return null;
-            }
-            finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
+        Call<MovieResponse> movies = service.movies(arguments);
+        movies.enqueue(new retrofit.Callback<MovieResponse>() {
+            @Override
+            public void onResponse(Response<MovieResponse> response) {
+                if (response.body() != null) {
+                    List<Movie> movies = response.body().results;
+                    for (Movie movie : movies) {
+                        mMovieAdapter.add(movie);
                     }
                 }
             }
 
-            try {
-                return getMoviesFromJson(popularMoviesStr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, "Could not convert to JSON", e);
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e(LOG_TAG, "Could not create entries");
             }
-
-            return null;
-        }
-
-        private Movie[] getMoviesFromJson(String popularMoviesJsonStr) throws JSONException {
-            final String KEY_RESULTS = "results";
-            final String KEY_TITLE = "title";
-            final String KEY_SYNOPSIS = "overview";
-            final String KEY_POSTER = "poster_path";
-            final String KEY_RELEASE_DATE = "release_date";
-            final String KEY_RATING = "vote_average";
-            final String KEY_COVER = "backdrop_path";
-            final String POSTER_PATH = "http://image.tmdb.org/t/p/w185";
-            final String COVER_PATH = "http://image.tmdb.org/t/p/w780";
-
-            JSONObject popularMoviesJson = new JSONObject(popularMoviesJsonStr);
-            JSONArray moviesJsonArray = popularMoviesJson.getJSONArray(KEY_RESULTS);
-
-            Movie[] movies = new Movie[moviesJsonArray.length()];
-            for (int i = 0; i < movies.length; i++) {
-                JSONObject movieJson = moviesJsonArray.getJSONObject(i);
-                String title = movieJson.getString(KEY_TITLE);
-                String posterUrl = POSTER_PATH + movieJson.getString(KEY_POSTER);
-                String coverUrl = COVER_PATH + movieJson.getString(KEY_COVER);
-                String synopsis = movieJson.getString(KEY_SYNOPSIS);
-                double rating = movieJson.getDouble(KEY_RATING);
-                String releaseDate = movieJson.getString(KEY_RELEASE_DATE);
-                movies[i] = new Movie(
-                        title,
-                        posterUrl,
-                        coverUrl,
-                        synopsis,
-                        rating,
-                        releaseDate
-                );
-            }
-
-            return movies;
-        }
-
-        @Override
-        protected void onPostExecute(Movie[] movies) {
-            if (movies != null) {
-                mMovieAdapter.clear();
-                mMovieAdapter.addAll(movies);
-            }
-        }
+        });
     }
-
 
     public interface Callback {
         void onItemSelected(Movie movie);

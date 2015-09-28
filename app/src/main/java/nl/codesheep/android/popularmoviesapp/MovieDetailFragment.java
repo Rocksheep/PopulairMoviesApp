@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import nl.codesheep.android.popularmoviesapp.data.Movie;
+import nl.codesheep.android.popularmoviesapp.data.MovieService;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -47,11 +48,14 @@ public class MovieDetailFragment extends Fragment {
             return rootView;
         }
         Movie movie = bundle.getParcelable("movie");
+        if (movie == null) {
+            return rootView;
+        }
 
         ImageView coverImageView = (ImageView)
                 rootView.findViewById(R.id.detail_movie_cover_image_view);
 
-        Picasso.with(getActivity()).load(movie.getCoverUrl()).into(coverImageView);
+        Picasso.with(getActivity()).load(MovieService.COVER_URL + movie.getCoverUrl()).into(coverImageView);
 
         TextView titleTextView = (TextView) rootView.findViewById(R.id.detail_movie_title);
         titleTextView.setText(movie.getTitle());
@@ -65,8 +69,6 @@ public class MovieDetailFragment extends Fragment {
 
         RatingBar ratingBar = (RatingBar) rootView.findViewById(R.id.detail_movie_rating);
         ratingBar.setRating((float) movie.getRating() / 2);
-        Log.d(LOG_TAG, "Rating: " + movie.getRating());
-        Log.d(LOG_TAG, "Stars: " + (movie.getRating() / 2));
 
         return rootView;
     }

@@ -12,6 +12,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import nl.codesheep.android.popularmoviesapp.data.Movie;
+import nl.codesheep.android.popularmoviesapp.data.MovieService;
 
 public class MovieAdapter extends ArrayAdapter<Movie> {
     private final String LOG_TAG = MovieAdapter.class.getSimpleName();
@@ -27,7 +28,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         }
         ImageView imageView = (ImageView) convertView.findViewById(R.id.movie_poster_image_view);
         String posterUrl = getItem(position).getPosterUrl();
-        Picasso.with(getContext()).load(posterUrl).into(imageView);
+        Picasso.with(getContext()).load(MovieService.POSTER_URL + posterUrl).into(imageView);
         return convertView;
     }
 
