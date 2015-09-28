@@ -1,6 +1,6 @@
 package nl.codesheep.android.popularmoviesapp;
 
-import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,16 +22,28 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import nl.codesheep.android.popularmoviesapp.data.Movie;
+import nl.codesheep.android.popularmoviesapp.data.TMDBService;
+import retrofit.Call;
+import retrofit.Converter;
+import retrofit.Retrofit;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MoviePosterFragment extends Fragment {
 
+    private static final String LOG_TAG = MoviePosterFragment.class.getSimpleName();
     private MovieAdapter mMovieAdapter;
+    private Callback mListener;
 
     public MoviePosterFragment() {
 
@@ -51,9 +63,7 @@ public class MoviePosterFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Movie movie = mMovieAdapter.getItem(position);
-                Intent movieDetailIntent = new Intent(getActivity(), MovieDetailActivity.class);
-                movieDetailIntent.putExtra("movie", movie);
-                startActivity(movieDetailIntent);
+                mListener.onItemSelected(movie);
             }
         });
 
@@ -61,9 +71,52 @@ public class MoviePosterFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mListener = (Callback) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement Callback.");
+        }
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
-        new FetchMoviePostersTask().execute();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://api.themoviedb.org/3")
+                .addConverterFactory(new Converter.Factory() {
+                    @Override
+                    public Converter<List<Movie>> get(Type type) {
+//                        type.
+                        return null;
+                    }
+                })
+                .build();
+        TMDBService service = retrofit.create(TMDBService.class);
+
+        String apiKey = getString(R.string.api_key);
+
+        SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        String order = preferences.getString(
+                getString(R.string.pref_order_key),
+                getString(R.string.pref_order_default)
+        );
+
+//        .appendQueryParameter("sort_by", order)
+//        .appendQueryParameter("api_key", apiKey)
+//        .appendQueryParameter("vote_count.gte", "100")
+
+        Map<String, String> arguments = new HashMap<>();
+        arguments.put("sort_by", order);
+        arguments.put("api_key", apiKey);
+        arguments.put("vote_count.gte", "100");
+
+        Call<List<Movie>> movies = service.getMovies(arguments);
+//        new FetchMoviePostersTask().execute();
     }
 
     private class FetchMoviePostersTask extends AsyncTask<Void, Void, Movie[]> {
@@ -183,5 +236,10 @@ public class MoviePosterFragment extends Fragment {
                 mMovieAdapter.addAll(movies);
             }
         }
+    }
+
+
+    public interface Callback {
+        void onItemSelected(Movie movie);
     }
 }

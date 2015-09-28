@@ -1,7 +1,7 @@
 package nl.codesheep.android.popularmoviesapp;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,14 +12,27 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import nl.codesheep.android.popularmoviesapp.data.Movie;
+
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MovieDetailActivityFragment extends Fragment {
+public class MovieDetailFragment extends Fragment {
 
-    private final String LOG_TAG = MovieDetailActivityFragment.class.getSimpleName();
+    private static final String MOVIE_KEY = "movie";
+    private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
-    public MovieDetailActivityFragment() {
+    public static MovieDetailFragment newInstance (Movie movie) {
+        MovieDetailFragment detailFragment = new MovieDetailFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(MOVIE_KEY, movie);
+        detailFragment.setArguments(bundle);
+
+        return detailFragment;
+    }
+
+    public MovieDetailFragment() {
 
     }
 
@@ -28,7 +41,11 @@ public class MovieDetailActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-        Bundle bundle = getActivity().getIntent().getExtras();
+        Bundle bundle = getArguments();
+        if (bundle == null) {
+            Log.d(LOG_TAG, "No bundle");
+            return rootView;
+        }
         Movie movie = bundle.getParcelable("movie");
 
         ImageView coverImageView = (ImageView)
@@ -51,7 +68,7 @@ public class MovieDetailActivityFragment extends Fragment {
         Log.d(LOG_TAG, "Rating: " + movie.getRating());
         Log.d(LOG_TAG, "Stars: " + (movie.getRating() / 2));
 
-
         return rootView;
     }
+
 }

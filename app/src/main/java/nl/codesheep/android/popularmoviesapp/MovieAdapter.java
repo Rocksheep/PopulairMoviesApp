@@ -11,6 +11,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import nl.codesheep.android.popularmoviesapp.data.Movie;
+
 public class MovieAdapter extends ArrayAdapter<Movie> {
     private final String LOG_TAG = MovieAdapter.class.getSimpleName();
 

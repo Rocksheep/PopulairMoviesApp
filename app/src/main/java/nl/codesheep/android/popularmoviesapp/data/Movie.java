@@ -1,11 +1,8 @@
-package nl.codesheep.android.popularmoviesapp;
+package nl.codesheep.android.popularmoviesapp.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by Rien on 12-9-2015.
- */
 public class Movie implements Parcelable {
 
     private String mTitle;

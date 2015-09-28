@@ -6,12 +6,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+import nl.codesheep.android.popularmoviesapp.data.Movie;
+
+public class MainActivity extends AppCompatActivity implements MoviePosterFragment.Callback {
+
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (findViewById(R.id.movie_detail_container) != null) {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(
+                                R.id.movie_detail_container,
+                                new MovieDetailFragment(),
+                                DETAILFRAGMENT_TAG
+                        )
+                        .commit();
+            }
+        }
+        else {
+            mTwoPane = false;
+        }
     }
 
 
@@ -36,5 +58,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSelected(Movie movie) {
+        if (mTwoPane) {
+            MovieDetailFragment detailFragment = MovieDetailFragment.newInstance(movie);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, detailFragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        }
+        else {
+            Intent movieDetailIntent = new Intent(this, MovieDetailActivity.class);
+            movieDetailIntent.putExtra("movie", movie);
+            startActivity(movieDetailIntent);
+        }
     }
 }

@@ -6,7 +6,7 @@
     <LinearLayout  android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="nl.codesheep.android.popularmoviesapp.MovieDetailActivityFragment">
+        tools:context="nl.codesheep.android.popularmoviesapp.MovieDetailFragment">
         <ImageView
             android:id="@+id/detail_movie_cover_image_view"
             android:layout_width="match_parent"
