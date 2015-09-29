@@ -2,8 +2,6 @@ package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -14,20 +12,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.google.gson.GsonBuilder;
-import com.squareup.okhttp.Request;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +21,6 @@ import nl.codesheep.android.popularmoviesapp.data.Movie;
 import nl.codesheep.android.popularmoviesapp.data.MovieResponse;
 import nl.codesheep.android.popularmoviesapp.data.MovieService;
 import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Converter;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
@@ -118,6 +100,7 @@ public class MoviePosterFragment extends Fragment {
         movies.enqueue(new retrofit.Callback<MovieResponse>() {
             @Override
             public void onResponse(Response<MovieResponse> response) {
+                Log.d(LOG_TAG, response.raw().request().urlString());
                 if (response.body() != null) {
                     List<Movie> movies = response.body().results;
                     for (Movie movie : movies) {

@@ -1,8 +1,6 @@
 package nl.codesheep.android.popularmoviesapp;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -106,6 +104,7 @@ public class MovieDetailFragment extends Fragment {
         reviewResponseCall.enqueue(new Callback<ReviewResponse>() {
             @Override
             public void onResponse(Response<ReviewResponse> response) {
+                Log.d(LOG_TAG, response.raw().request().urlString());
                 if(response.body() != null) {
                     for (Review review : response.body().results) {
                         View view = inflater.inflate(R.layout.review, parent, false);
