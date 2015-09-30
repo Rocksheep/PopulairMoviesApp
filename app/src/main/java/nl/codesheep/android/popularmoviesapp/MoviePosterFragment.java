@@ -5,12 +5,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,16 +45,29 @@ public class MoviePosterFragment extends Fragment {
 
         mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
-        GridView gridView = (GridView) rootView.findViewById(R.id.movie_grid_view);
-        gridView.setAdapter(mMovieAdapter);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup(){
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Movie movie = mMovieAdapter.getItem(position);
-                mListener.onItemSelected(movie);
+            public int getSpanSize(int position) {
+                if (position % 3 == 2) {
+                    return 2;
+                }
+                return 1;
             }
         });
+
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.movie_recycler_view);
+        recyclerView.setAdapter(mMovieAdapter);
+        recyclerView.setLayoutManager(gridLayoutManager);
+
+//        recyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//                Movie movie = mMovieAdapter.getItem(position);
+//                mListener.onItemSelected(movie);
+//            }
+//        });
 
         return rootView;
     }

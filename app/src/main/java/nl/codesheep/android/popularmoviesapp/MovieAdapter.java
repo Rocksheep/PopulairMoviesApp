@@ -1,35 +1,107 @@
 package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import nl.codesheep.android.popularmoviesapp.data.Movie;
 import nl.codesheep.android.popularmoviesapp.data.MovieService;
 
-public class MovieAdapter extends ArrayAdapter<Movie> {
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
     private final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
-    public MovieAdapter(Context context, List<Movie> movies) {
-        super(context, 0, movies);
+    private ArrayList<Movie> mMovies;
+    private Context mContext;
+
+    private static final int POSTER_VIEW = 0;
+    private static final int POSTER_DETAIL_VIEW = 1;
+
+    public MovieAdapter(Context context, ArrayList<Movie> movies) {
+        mContext = context;
+        mMovies = movies;
+    }
+
+    public void add(Movie movie) {
+        mMovies.add(movie);
+        notifyDataSetChanged();
+    }
+
+    public void addAll(Movie[] movies) {
+        for (Movie movie : movies) {
+            mMovies.add(movie);
+        }
+        notifyDataSetChanged();
+    }
+
+    public Movie getItem(int position) {
+        return mMovies.get(position);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.movie_poster, parent, false);
+    public int getItemViewType(int position) {
+        return position % 3 == 2 ? POSTER_DETAIL_VIEW : POSTER_VIEW;
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view;
+        if (viewType == POSTER_VIEW) {
+            view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.movie_poster, parent, false);
         }
-        ImageView imageView = (ImageView) convertView.findViewById(R.id.movie_poster_image_view);
+        else {
+            view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.movie_poster_big, parent, false);
+        }
+        ViewHolder viewHolder = new ViewHolder(view);
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
         String posterUrl = getItem(position).getPosterUrl();
-        Picasso.with(getContext()).load(MovieService.POSTER_URL + posterUrl).into(imageView);
-        return convertView;
+        String title = getItem(position).getTitle();
+        holder.titleTextView.setText(title);
+        double rating = getItem(position).getRating() / 2;
+        holder.ratingTextView.setText(mContext.getString(R.string.format_rating, rating));
+        Picasso.with(mContext)
+                .load(MovieService.POSTER_URL + posterUrl)
+                .placeholder(R.drawable.placeholder)
+                .into(holder.imageView);
+
+        if (getItemViewType(position) == POSTER_DETAIL_VIEW) {
+            holder.descriptionTextView.setText(mMovies.get(position).getSynopsis());
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return mMovies.size();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
+        public ImageView imageView;
+        public TextView titleTextView;
+        public TextView ratingTextView;
+        public TextView descriptionTextView;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            imageView = (ImageView) itemView.findViewById(R.id.movie_poster_image_view);
+            titleTextView = (TextView) itemView.findViewById(R.id.movie_poster_title_text_view);
+            ratingTextView = (TextView) itemView.findViewById(R.id.movie_poster_rating_text_view);
+            descriptionTextView = (TextView) itemView.
+                    findViewById(R.id.movie_poster_overview_text_view);
+        }
     }
 
 }

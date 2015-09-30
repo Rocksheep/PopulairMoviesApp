@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
     <string name="app_name">Popular Movies App</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -16,5 +16,7 @@
     <string name="movie_title">Title</string>
     <string name="movie_release_date">2015-01-01</string>
     <string name="movie_synopsis">Synopsis</string>
+
+    <string name="format_rating"><xliff:g id="rating">%1$1.1f</xliff:g> \u2605</string>
 
 </resources>
