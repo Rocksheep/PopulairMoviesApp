@@ -52,12 +52,15 @@ public class MovieDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
+        Movie movie = null;
         Bundle bundle = getArguments();
-        if (bundle == null) {
-            Log.d(LOG_TAG, "No bundle");
-            return rootView;
+        if (bundle != null) {
+            movie = bundle.getParcelable("movie");
         }
-        Movie movie = bundle.getParcelable("movie");
+        else {
+            Bundle extras = getActivity().getIntent().getExtras();
+            movie = extras.getParcelable("movie");
+        }
         if (movie == null) {
             return rootView;
         }
@@ -68,7 +71,15 @@ public class MovieDetailFragment extends Fragment {
         ImageView coverImageView = (ImageView)
                 rootView.findViewById(R.id.detail_movie_cover_image_view);
 
-        Picasso.with(getActivity()).load(MovieService.COVER_URL + movie.getCoverUrl()).into(coverImageView);
+        Picasso.with(getActivity())
+                .load(MovieService.COVER_URL + movie.getCoverUrl()).into(coverImageView);
+
+        ImageView posterImageView = (ImageView)
+                rootView.findViewById(R.id.detail_movie_poster_image_view);
+        Picasso.with(getActivity())
+                .load(MovieService.POSTER_URL + movie.getPosterUrl())
+                .placeholder(R.drawable.placeholder)
+                .into(posterImageView);
 
         TextView titleTextView = (TextView) rootView.findViewById(R.id.detail_movie_title);
         titleTextView.setText(movie.getTitle());

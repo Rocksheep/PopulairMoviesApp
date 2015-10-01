@@ -32,7 +32,6 @@ public class MoviePosterFragment extends Fragment {
 
     private static final String LOG_TAG = MoviePosterFragment.class.getSimpleName();
     private MovieAdapter mMovieAdapter;
-    private Callback mListener;
 
     public MoviePosterFragment() {
 
@@ -70,16 +69,6 @@ public class MoviePosterFragment extends Fragment {
 //        });
 
         return rootView;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            mListener = (Callback) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement Callback.");
-        }
     }
 
     @Override
@@ -125,11 +114,9 @@ public class MoviePosterFragment extends Fragment {
             @Override
             public void onFailure(Throwable t) {
                 Log.e(LOG_TAG, "Could not create entries");
+                t.printStackTrace();
             }
         });
     }
 
-    public interface Callback {
-        void onItemSelected(Movie movie);
-    }
 }

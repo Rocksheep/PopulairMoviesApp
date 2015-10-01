@@ -2,6 +2,7 @@ package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +68,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.position = position;
         String posterUrl = getItem(position).getPosterUrl();
         String title = getItem(position).getTitle();
         holder.titleTextView.setText(title);
@@ -87,7 +89,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         return mMovies.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        public int position;
 
         public ImageView imageView;
         public TextView titleTextView;
@@ -96,12 +100,28 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         public ViewHolder(View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
             imageView = (ImageView) itemView.findViewById(R.id.movie_poster_image_view);
             titleTextView = (TextView) itemView.findViewById(R.id.movie_poster_title_text_view);
             ratingTextView = (TextView) itemView.findViewById(R.id.movie_poster_rating_text_view);
             descriptionTextView = (TextView) itemView.
                     findViewById(R.id.movie_poster_overview_text_view);
         }
+
+        @Override
+        public void onClick(View v) {
+            try {
+                Callback listener = (Callback) mContext;
+                listener.onItemSelected(getItem(position));
+            } catch (ClassCastException e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
+
+        }
+    }
+
+    public interface Callback {
+        void onItemSelected(Movie movie);
     }
 
 }

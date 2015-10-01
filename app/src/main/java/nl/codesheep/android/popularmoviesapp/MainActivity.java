@@ -8,7 +8,7 @@ import android.view.MenuItem;
 
 import nl.codesheep.android.popularmoviesapp.data.Movie;
 
-public class MainActivity extends AppCompatActivity implements MoviePosterFragment.Callback {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.Callback {
 
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
