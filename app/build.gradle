@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
 
 ext.extProgram = new Properties()
 extProgram.load(file("app.properties").newDataInputStream())
@@ -35,4 +36,7 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta1'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta1'
+
+    apt 'net.simonvt.schematic:schematic-compiler:0.6.3'
+    compile 'net.simonvt.schematic:schematic:0.6.3'
 }

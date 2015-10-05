@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import nl.codesheep.android.popularmoviesapp.data.Movie;
+import nl.codesheep.android.popularmoviesapp.sync.SyncAdapter;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.Callback {
 
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Call
         else {
             mTwoPane = false;
         }
+
+        SyncAdapter.initializeSyncAdapter(this);
     }
 
 

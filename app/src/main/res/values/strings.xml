@@ -19,4 +19,7 @@
 
     <string name="format_rating"><xliff:g id="rating">%1$1.1f</xliff:g> \u2605</string>
 
+    <string name="account_type">codesheep.nl</string>
+    <string name="content_authority">nl.codesheep.android.popularmoviesapp.data.MovieProvider</string>
+
 </resources>
