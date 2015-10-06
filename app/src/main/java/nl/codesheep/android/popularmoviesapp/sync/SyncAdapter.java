@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -27,8 +28,10 @@ import nl.codesheep.android.popularmoviesapp.R;
 import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
+import nl.codesheep.android.popularmoviesapp.models.Review;
 import nl.codesheep.android.popularmoviesapp.rest.MovieResponse;
 import nl.codesheep.android.popularmoviesapp.rest.MovieService;
+import nl.codesheep.android.popularmoviesapp.sync.fetcher.ReviewSyncer;
 import retrofit.Call;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
@@ -84,17 +87,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         movies.enqueue(new retrofit.Callback<MovieResponse>() {
             @Override
             public void onResponse(Response<MovieResponse> response) {
-                mContentResolver.delete(
-                        MovieProvider.Movies.MOVIES,
-                        null,
-                        null
-                );
+                deletePreviousReviews();
+                deletePreviousMovies();
                 Log.d(LOG_TAG, "Response received");
                 Log.d(LOG_TAG, response.raw().request().urlString());
                 if (response.body() != null) {
                     List<Movie> movies = response.body().results;
-                    ArrayList<ContentValues> bulkContentValues = new ArrayList<>();
+
                     for (Movie movie : movies) {
+                        ReviewSyncer reviewSyncer = new ReviewSyncer(getContext());
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(MovieColumns.MOVIE_ID, movie.getMovieId());
                         contentValues.put(MovieColumns.COVER_URI, movie.getCoverUrl());
@@ -113,16 +114,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         contentValues.put(MovieColumns.RELEASE_DATE, timestamp);
                         contentValues.put(MovieColumns.SYNOPSIS, movie.getSynopsis());
                         contentValues.put(MovieColumns.TITLE, movie.getTitle());
-                        bulkContentValues.add(contentValues);
-                    }
 
-                    ContentValues[] entries = new ContentValues[bulkContentValues.size()];
-                    bulkContentValues.toArray(entries);
-                    int numInsertedEntries = mContentResolver.bulkInsert(
-                            MovieProvider.Movies.MOVIES,
-                            entries
-                    );
-                    Log.d(LOG_TAG, Integer.toString(numInsertedEntries) + " Movies inserted");
+                        mContentResolver.insert(
+                                MovieProvider.Movies.MOVIES,
+                                contentValues
+                        );
+
+                        reviewSyncer.forMovie(movie.getMovieId()).sync();
+                    }
                 }
             }
 
@@ -132,6 +131,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 t.printStackTrace();
             }
         });
+    }
+
+    private void deletePreviousMovies() {
+        mContentResolver.delete(
+                MovieProvider.Movies.MOVIES,
+                null,
+                null
+        );
     }
 
     public static void initializeSyncAdapter(Context context) {
@@ -170,7 +177,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 context.getString(R.string.content_authority),
                 true
         );
-        syncImmediately(context);
+//        syncImmediately(context);
     }
 
     public static void syncImmediately(Context context) {
@@ -201,5 +208,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         else {
             ContentResolver.addPeriodicSync(account, authority, new Bundle(), syncInterval);
         }
+    }
+
+    private void deletePreviousReviews() {
+        mContentResolver.delete(
+                MovieProvider.Reviews.REVIEWS,
+                null,
+                null
+        );
     }
 }

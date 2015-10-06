@@ -1,7 +1,11 @@
 package nl.codesheep.android.popularmoviesapp;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import java.util.HashMap;
 import java.util.Map;
 
+import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 import nl.codesheep.android.popularmoviesapp.models.Review;
@@ -28,10 +33,15 @@ import retrofit.Retrofit;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MovieDetailFragment extends Fragment {
+public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String MOVIE_KEY = "movie";
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
+    private static final int LOADER_ID = 1;
+    private Movie mMovie;
+
+    private LayoutInflater mLayoutInflater;
+    private ViewGroup mReviewsParent;
 
     public static MovieDetailFragment newInstance (Movie movie) {
         MovieDetailFragment detailFragment = new MovieDetailFragment();
@@ -52,7 +62,7 @@ public class MovieDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-        Movie movie = null;
+        Movie movie;
         Bundle bundle = getArguments();
         if (bundle != null) {
             movie = bundle.getParcelable("movie");
@@ -64,9 +74,14 @@ public class MovieDetailFragment extends Fragment {
         if (movie == null) {
             return rootView;
         }
+        mMovie = movie;
+        getLoaderManager().initLoader(LOADER_ID, null, this);
+
 
         ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
-        retrieveReviews(movie.getMovieId(), inflater, reviewContainer);
+//        retrieveReviews(movie.getMovieId(), inflater, reviewContainer);
+        mLayoutInflater = inflater;
+        mReviewsParent = reviewContainer;
 
         ImageView coverImageView = (ImageView)
                 rootView.findViewById(R.id.detail_movie_cover_image_view);
@@ -133,4 +148,39 @@ public class MovieDetailFragment extends Fragment {
         });
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (mMovie == null) return null;
+
+        return new CursorLoader(
+                getActivity(),
+                MovieProvider.Reviews.fromMovie(mMovie.getMovieId()),
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.d(LOG_TAG, "onLoadFinished has been called");
+        if (!cursor.moveToFirst()) {
+            Log.d(LOG_TAG, "No reviews found");
+            return;
+        }
+        do {
+            Review review = Review.fromCursor(cursor);
+            Log.d(LOG_TAG, review.author);
+            View view = mLayoutInflater.inflate(R.layout.review, mReviewsParent, false);
+            TextView textView = (TextView) view.findViewById(R.id.review_text_view);
+            textView.setText(review.content);
+            mReviewsParent.addView(view);
+        } while (cursor.moveToNext());
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }
