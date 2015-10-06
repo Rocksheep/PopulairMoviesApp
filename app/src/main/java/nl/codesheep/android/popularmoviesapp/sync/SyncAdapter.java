@@ -36,7 +36,7 @@ import retrofit.Retrofit;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
-    public static final int SYNC_INTERVAL = 10;
+    public static final int SYNC_INTERVAL = 60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
     private static final String LOG_TAG = SyncAdapter.class.getSimpleName();
 
@@ -101,7 +101,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         contentValues.put(MovieColumns.RATING, movie.getRating());
 
                         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                        long timestamp = 0;
+                        long timestamp;
                         try {
                             Date parsedDate = dateFormat.parse(movie.getReleaseDate());
                             timestamp = parsedDate.getTime();
