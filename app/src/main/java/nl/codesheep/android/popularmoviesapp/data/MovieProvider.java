@@ -14,7 +14,7 @@ public final class MovieProvider {
     }
 
     public static final String AUTHORITY =
-            "nl.codesheep.android.popularmoviesapp.data.MovieProvider";
+            "nl.codesheep.android.popularmoviesapp.data";
 
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 

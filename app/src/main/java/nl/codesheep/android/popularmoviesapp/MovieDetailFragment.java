@@ -15,9 +15,9 @@ import com.squareup.picasso.Picasso;
 import java.util.HashMap;
 import java.util.Map;
 
-import nl.codesheep.android.popularmoviesapp.data.Movie;
-import nl.codesheep.android.popularmoviesapp.data.MovieService;
-import nl.codesheep.android.popularmoviesapp.data.Review;
+import nl.codesheep.android.popularmoviesapp.models.Movie;
+import nl.codesheep.android.popularmoviesapp.rest.MovieService;
+import nl.codesheep.android.popularmoviesapp.models.Review;
 import nl.codesheep.android.popularmoviesapp.rest.ReviewResponse;
 import retrofit.Call;
 import retrofit.Callback;

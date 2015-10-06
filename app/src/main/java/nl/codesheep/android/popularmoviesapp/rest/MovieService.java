@@ -1,8 +1,7 @@
-package nl.codesheep.android.popularmoviesapp.data;
+package nl.codesheep.android.popularmoviesapp.rest;
 
 import java.util.Map;
 
-import nl.codesheep.android.popularmoviesapp.rest.ReviewResponse;
 import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Path;

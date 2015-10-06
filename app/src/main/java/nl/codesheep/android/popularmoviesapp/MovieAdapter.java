@@ -1,6 +1,7 @@
 package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,14 +14,15 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import nl.codesheep.android.popularmoviesapp.data.Movie;
-import nl.codesheep.android.popularmoviesapp.data.MovieService;
+import nl.codesheep.android.popularmoviesapp.models.Movie;
+import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
     private final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
     private ArrayList<Movie> mMovies;
     private Context mContext;
+    private Cursor mCursor;
 
     private static final int POSTER_VIEW = 0;
     private static final int POSTER_DETAIL_VIEW = 1;
@@ -28,18 +30,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     public MovieAdapter(Context context, ArrayList<Movie> movies) {
         mContext = context;
         mMovies = movies;
-    }
-
-    public void add(Movie movie) {
-        mMovies.add(movie);
-        notifyDataSetChanged();
-    }
-
-    public void addAll(Movie[] movies) {
-        for (Movie movie : movies) {
-            mMovies.add(movie);
-        }
-        notifyDataSetChanged();
     }
 
     public Movie getItem(int position) {

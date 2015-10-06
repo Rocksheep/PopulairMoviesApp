@@ -5,14 +5,34 @@ import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import nl.codesheep.android.popularmoviesapp.R;
+import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
+import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
+import nl.codesheep.android.popularmoviesapp.models.Movie;
+import nl.codesheep.android.popularmoviesapp.rest.MovieResponse;
+import nl.codesheep.android.popularmoviesapp.rest.MovieService;
+import retrofit.Call;
+import retrofit.GsonConverterFactory;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -34,16 +54,94 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        //TODO: Get data from server
-        Log.d(LOG_TAG, "Syncing from server");
+        Log.d(LOG_TAG, "onPerformSync called");
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(MovieService.API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        MovieService.TheMovieDatabase service =
+                retrofit.create(MovieService.TheMovieDatabase.class);
+
+        String apiKey = getContext().getString(R.string.api_key);
+
+        SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        String order = preferences.getString(
+                getContext().getString(R.string.pref_order_key),
+                getContext().getString(R.string.pref_order_default)
+        );
+
+        Map<String, String> arguments = new HashMap<>();
+        arguments.put("sort_by", order);
+        arguments.put("api_key", apiKey);
+        arguments.put("vote_count.gte", "100");
+
+        Call<MovieResponse> movies = service.movies(arguments);
+        Log.d(LOG_TAG, "Enqueueing call");
+        movies.enqueue(new retrofit.Callback<MovieResponse>() {
+            @Override
+            public void onResponse(Response<MovieResponse> response) {
+                mContentResolver.delete(
+                        MovieProvider.Movies.MOVIES,
+                        null,
+                        null
+                );
+                Log.d(LOG_TAG, "Response received");
+                Log.d(LOG_TAG, response.raw().request().urlString());
+                if (response.body() != null) {
+                    List<Movie> movies = response.body().results;
+                    ArrayList<ContentValues> bulkContentValues = new ArrayList<>();
+                    for (Movie movie : movies) {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(MovieColumns.COVER_URI, movie.getCoverUrl());
+                        contentValues.put(MovieColumns.POSTER_URI, movie.getPosterUrl());
+                        contentValues.put(MovieColumns.RATING, movie.getRating());
+
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        long timestamp = 0;
+                        try {
+                            Date parsedDate = dateFormat.parse(movie.getReleaseDate());
+                            timestamp = parsedDate.getTime();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            timestamp = 0;
+                        }
+                        contentValues.put(MovieColumns.RELEASE_DATE, timestamp);
+                        contentValues.put(MovieColumns.SYNOPSIS, movie.getSynopsis());
+                        contentValues.put(MovieColumns.TITLE, movie.getTitle());
+                        bulkContentValues.add(contentValues);
+                    }
+
+                    ContentValues[] entries = new ContentValues[bulkContentValues.size()];
+                    bulkContentValues.toArray(entries);
+                    int numInsertedEntries = mContentResolver.bulkInsert(
+                            MovieProvider.Movies.MOVIES,
+                            entries
+                    );
+                    //TODO: insert movies into database
+                    Log.d(LOG_TAG, Integer.toString(numInsertedEntries) + " Movies inserted");
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e(LOG_TAG, "Could not create entries");
+                t.printStackTrace();
+            }
+        });
     }
 
     public static void initializeSyncAdapter(Context context) {
+        Log.d(LOG_TAG, "Initializing sync adapter");
         getSyncAccount(context);
     }
 
     public static Account getSyncAccount(Context context) {
-        AccountManager accountManager = AccountManager.get(context);
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         Account newAccount = new Account(
                 context.getString(R.string.app_name), context.getString(R.string.account_type)
@@ -51,10 +149,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         if (accountManager.getPassword(newAccount) == null) {
             if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
+                Log.d(LOG_TAG, "Couldn't create new account");
                 return null;
             }
 
+            Log.d(LOG_TAG, "Sending on account created");
             onAccountCreated(context, newAccount);
+        }
+        else {
+            Log.d(LOG_TAG, "Old account spotted");
         }
         return newAccount;
     }
@@ -71,10 +174,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     public static void syncImmediately(Context context) {
-        Log.d(LOG_TAG, "Send sync request");
+        Log.d(LOG_TAG, "Syncing immediately");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        Log.d(LOG_TAG, "Getting account for sync request");
         ContentResolver.requestSync(
                 getSyncAccount(context),
                 context.getString(R.string.content_authority),
@@ -83,6 +187,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     public static void configurePeriodicSync(Context context, int syncInterval, int flexTime) {
+        Log.d(LOG_TAG, "Getting account for periodic sync");
         Account account = getSyncAccount(context);
         String authority = context.getString(R.string.content_authority);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

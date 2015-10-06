@@ -1,11 +1,11 @@
-package nl.codesheep.android.popularmoviesapp.data;
+package nl.codesheep.android.popularmoviesapp.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Movie implements Parcelable {
+public class Movie extends Model implements Parcelable{
 
     @SerializedName("id")
     private long mMovieId;

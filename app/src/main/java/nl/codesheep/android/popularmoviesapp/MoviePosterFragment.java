@@ -1,29 +1,21 @@
 package nl.codesheep.android.popularmoviesapp;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Date;
 
-import nl.codesheep.android.popularmoviesapp.data.Movie;
-import nl.codesheep.android.popularmoviesapp.data.MovieResponse;
-import nl.codesheep.android.popularmoviesapp.data.MovieService;
-import retrofit.Call;
-import retrofit.GsonConverterFactory;
-import retrofit.Response;
-import retrofit.Retrofit;
+import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
+import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
+import nl.codesheep.android.popularmoviesapp.models.Movie;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -32,6 +24,7 @@ public class MoviePosterFragment extends Fragment {
 
     private static final String LOG_TAG = MoviePosterFragment.class.getSimpleName();
     private MovieAdapter mMovieAdapter;
+    private ArrayList<Movie> mMovies = null;
 
     public MoviePosterFragment() {
 
@@ -42,7 +35,8 @@ public class MoviePosterFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
+        loadMovies();
+        mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup(){
@@ -74,49 +68,57 @@ public class MoviePosterFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+    }
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MovieService.API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    private void loadMovies() {
 
-        MovieService.TheMovieDatabase service =
-                retrofit.create(MovieService.TheMovieDatabase.class);
+        if (mMovies == null) {
+            mMovies = new ArrayList<>();
+        }
 
-        String apiKey = getString(R.string.api_key);
-
-        SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-        String order = preferences.getString(
-                getString(R.string.pref_order_key),
-                getString(R.string.pref_order_default)
+        Cursor cursor = getActivity().getContentResolver().query(
+                MovieProvider.Movies.MOVIES,
+                MOVIE_COLUMNS,
+                null,
+                null,
+                null
         );
 
-        Map<String, String> arguments = new HashMap<>();
-        arguments.put("sort_by", order);
-        arguments.put("api_key", apiKey);
-        arguments.put("vote_count.gte", "100");
+        if (cursor.moveToFirst()) {
 
-        Call<MovieResponse> movies = service.movies(arguments);
-        movies.enqueue(new retrofit.Callback<MovieResponse>() {
-            @Override
-            public void onResponse(Response<MovieResponse> response) {
-                Log.d(LOG_TAG, response.raw().request().urlString());
-                if (response.body() != null) {
-                    List<Movie> movies = response.body().results;
-                    for (Movie movie : movies) {
-                        mMovieAdapter.add(movie);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.e(LOG_TAG, "Could not create entries");
-                t.printStackTrace();
-            }
-        });
+            do {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
+                Date date = new Date(cursor.getLong(COL_MOVIE_RELEASE_DATE));
+                Movie movie = new Movie(
+                        cursor.getLong(COL_MOVIE_ID),
+                        cursor.getString(COL_MOVIE_TITLE),
+                        cursor.getString(COL_MOVIE_POSTER_URI),
+                        cursor.getString(COL_MOVIE_COVER_URI),
+                        cursor.getString(COL_MOVIE_SYNOPSIS),
+                        cursor.getDouble(COL_MOVIE_RATING),
+                        dateFormat.format(date)
+                );
+                mMovies.add(movie);
+            } while (cursor.moveToNext());
+        }
     }
+
+    private static final String[] MOVIE_COLUMNS = {
+            MovieColumns._ID,
+            MovieColumns.TITLE,
+            MovieColumns.SYNOPSIS,
+            MovieColumns.RELEASE_DATE,
+            MovieColumns.RATING,
+            MovieColumns.POSTER_URI,
+            MovieColumns.COVER_URI
+    };
+
+    static final int COL_MOVIE_ID = 0;
+    static final int COL_MOVIE_TITLE = 1;
+    static final int COL_MOVIE_SYNOPSIS = 2;
+    static final int COL_MOVIE_RELEASE_DATE = 3;
+    static final int COL_MOVIE_RATING = 4;
+    static final int COL_MOVIE_POSTER_URI = 5;
+    static final int COL_MOVIE_COVER_URI = 6;
 
 }

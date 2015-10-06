@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import nl.codesheep.android.popularmoviesapp.data.Movie;
+import nl.codesheep.android.popularmoviesapp.models.Movie;
 import nl.codesheep.android.popularmoviesapp.sync.SyncAdapter;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.Callback {

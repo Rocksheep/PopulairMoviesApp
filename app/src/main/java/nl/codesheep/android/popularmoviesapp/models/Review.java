@@ -1,4 +1,4 @@
-package nl.codesheep.android.popularmoviesapp.data;
+package nl.codesheep.android.popularmoviesapp.models;
 
 public class Review {
 

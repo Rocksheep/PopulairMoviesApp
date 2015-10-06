@@ -49,18 +49,18 @@
         </service>
 
         <provider
-            android:authorities="nl.codesheep.android.popularmoviesapp.data"
+            android:authorities="@string/content_authority"
             android:name=".data.generated.MovieProvider"
             android:exported="false"
             android:syncable="true" />
 
         <service android:name=".sync.SyncService"
-            android:exported="true"
-            android:process=":sync">
+            android:exported="true">
             <intent-filter>
-                <action android:name="andorid.content.SyncAdapter" />
+                <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
+            <meta-data
+                android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter"/>
         </service>
     </application>

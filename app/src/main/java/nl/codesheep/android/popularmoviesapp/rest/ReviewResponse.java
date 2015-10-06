@@ -2,7 +2,7 @@ package nl.codesheep.android.popularmoviesapp.rest;
 
 import java.util.List;
 
-import nl.codesheep.android.popularmoviesapp.data.Review;
+import nl.codesheep.android.popularmoviesapp.models.Review;
 
 public class ReviewResponse {
 
