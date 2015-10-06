@@ -96,6 +96,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     ArrayList<ContentValues> bulkContentValues = new ArrayList<>();
                     for (Movie movie : movies) {
                         ContentValues contentValues = new ContentValues();
+                        contentValues.put(MovieColumns.MOVIE_ID, movie.getMovieId());
                         contentValues.put(MovieColumns.COVER_URI, movie.getCoverUrl());
                         contentValues.put(MovieColumns.POSTER_URI, movie.getPosterUrl());
                         contentValues.put(MovieColumns.RATING, movie.getRating());

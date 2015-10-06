@@ -1,11 +1,19 @@
 package nl.codesheep.android.popularmoviesapp.models;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
+
 public class Movie implements Parcelable{
+
+    private long mId;
 
     @SerializedName("id")
     private long mMovieId;
@@ -28,7 +36,14 @@ public class Movie implements Parcelable{
     @SerializedName("release_date")
     private String mReleaseDate;
 
-    public Movie(long movieId, String title, String posterUrl, String coverUrl, String synopsis, double rating, String releaseDate) {
+    public Movie(
+            long movieId,
+            String title,
+            String posterUrl,
+            String coverUrl,
+            String synopsis,
+            double rating,
+            String releaseDate) {
         mMovieId = movieId;
         mTitle = title;
         mPosterUrl = posterUrl;
@@ -36,9 +51,11 @@ public class Movie implements Parcelable{
         mSynopsis = synopsis;
         mRating = rating;
         mReleaseDate = releaseDate;
+        mId = 0;
     }
 
     protected Movie(Parcel in) {
+        mId = in.readLong();
         mMovieId = in.readLong();
         mTitle = in.readString();
         mPosterUrl = in.readString();
@@ -46,6 +63,33 @@ public class Movie implements Parcelable{
         mSynopsis = in.readString();
         mRating = in.readDouble();
         mReleaseDate = in.readString();
+    }
+
+    public static Movie fromCursor(Cursor cursor) {
+        int idIndex = cursor.getColumnIndexOrThrow(MovieColumns._ID);
+        int movieIdIndex = cursor.getColumnIndexOrThrow(MovieColumns.MOVIE_ID);
+        int titleIndex = cursor.getColumnIndexOrThrow(MovieColumns.TITLE);
+        int posterUriIndex = cursor.getColumnIndexOrThrow(MovieColumns.POSTER_URI);
+        int coverUriIndex = cursor.getColumnIndexOrThrow(MovieColumns.COVER_URI);
+        int synopsisIndex = cursor.getColumnIndexOrThrow(MovieColumns.SYNOPSIS);
+        int ratingIndex = cursor.getColumnIndexOrThrow(MovieColumns.RATING);
+        int releaseDateIndex = cursor.getColumnIndexOrThrow(MovieColumns.RELEASE_DATE);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
+        Date date = new Date(cursor.getLong(releaseDateIndex));
+
+        Movie movie = new Movie(
+                cursor.getLong(movieIdIndex),
+                cursor.getString(titleIndex),
+                cursor.getString(posterUriIndex),
+                cursor.getString(coverUriIndex),
+                cursor.getString(synopsisIndex),
+                cursor.getDouble(ratingIndex),
+                dateFormat.format(date)
+        );
+        movie.setId(cursor.getLong(idIndex));
+
+        return movie;
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -59,6 +103,14 @@ public class Movie implements Parcelable{
             return new Movie[size];
         }
     };
+
+    public long getId() {
+        return mId;
+    }
+
+    public void setId(long id) {
+        mId = id;
+    }
 
     public String getReleaseDate() {
         return mReleaseDate;
@@ -91,6 +143,7 @@ public class Movie implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mId);
         dest.writeLong(mMovieId);
         dest.writeString(mTitle);
         dest.writeString(mPosterUrl);
