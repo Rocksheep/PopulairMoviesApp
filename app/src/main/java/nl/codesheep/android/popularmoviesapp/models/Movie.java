@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Movie extends Model implements Parcelable{
+public class Movie implements Parcelable{
 
     @SerializedName("id")
     private long mMovieId;
