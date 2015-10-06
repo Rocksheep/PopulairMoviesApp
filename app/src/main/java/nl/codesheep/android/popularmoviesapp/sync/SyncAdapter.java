@@ -37,7 +37,7 @@ import retrofit.Retrofit;
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     public static final int SYNC_INTERVAL = 60 * 180;
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
     private static final String LOG_TAG = SyncAdapter.class.getSimpleName();
 
     ContentResolver mContentResolver;
@@ -121,7 +121,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             MovieProvider.Movies.MOVIES,
                             entries
                     );
-                    //TODO: insert movies into database
                     Log.d(LOG_TAG, Integer.toString(numInsertedEntries) + " Movies inserted");
                 }
             }
