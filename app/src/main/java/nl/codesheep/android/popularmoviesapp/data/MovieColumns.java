@@ -8,6 +8,7 @@ import net.simonvt.schematic.annotation.PrimaryKey;
 public interface MovieColumns {
 
     @DataType(DataType.Type.INTEGER) @PrimaryKey @AutoIncrement String _ID = "_id";
+    @DataType(DataType.Type.INTEGER) @NotNull String MOVIE_ID = "movie_id";
     @DataType(DataType.Type.TEXT) @NotNull String TITLE = "title";
     @DataType(DataType.Type.TEXT) @NotNull String POSTER_URI = "poster_uri";
     @DataType(DataType.Type.TEXT) @NotNull String COVER_URI = "cover_uri";

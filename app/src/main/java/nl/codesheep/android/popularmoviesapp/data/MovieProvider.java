@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
+import net.simonvt.schematic.annotation.InexactContentUri;
 import net.simonvt.schematic.annotation.TableEndpoint;
 
 @ContentProvider(authority = MovieProvider.AUTHORITY, database = MovieDatabase.class)
@@ -26,17 +27,37 @@ public final class MovieProvider {
         return uriBuilder.build();
     }
 
-    private abstract class Path {
-        public static final String MOVIES = "movies";
+    interface Path {
+        String MOVIES = "movies";
+        String REVIEWS = "reviews";
     }
 
     @TableEndpoint(table = MovieDatabase.MOVIES) public static class Movies {
 
         @ContentUri(
                 path = Path.MOVIES,
-                type = "vnd.android.cursor.dir/list"
+                type = "vnd.android.cursor.dir/movie"
         )
         public static final Uri MOVIES = buildUri(Path.MOVIES);
 
+    }
+
+    @TableEndpoint(table = MovieDatabase.REVIEWS) public static class Reviews {
+        @ContentUri(
+                path = Path.REVIEWS,
+                type = "vnd.android.cursor.dir/review"
+        )
+        public static final Uri REVIEWS = buildUri(Path.REVIEWS);
+
+        @InexactContentUri(
+                path = Path.MOVIES + "/#/" + Path.REVIEWS,
+                name = "REVIEWS_OF_MOVIE",
+                type = "vnd.android.cursor.dir/review",
+                whereColumn = ReviewColumns.MOVIE_KEY,
+                pathSegment = 1
+        )
+        public static Uri fromMovie(long movieId) {
+            return buildUri(Path.MOVIES, String.valueOf(movieId), Path.REVIEWS);
+        }
     }
 }

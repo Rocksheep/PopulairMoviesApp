@@ -54,14 +54,6 @@ public class MoviePosterFragment extends Fragment {
         recyclerView.setAdapter(mMovieAdapter);
         recyclerView.setLayoutManager(gridLayoutManager);
 
-//        recyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                Movie movie = mMovieAdapter.getItem(position);
-//                mListener.onItemSelected(movie);
-//            }
-//        });
-
         return rootView;
     }
 
@@ -78,47 +70,18 @@ public class MoviePosterFragment extends Fragment {
 
         Cursor cursor = getActivity().getContentResolver().query(
                 MovieProvider.Movies.MOVIES,
-                MOVIE_COLUMNS,
+                null,
                 null,
                 null,
                 null
         );
 
         if (cursor.moveToFirst()) {
-
             do {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
-                Date date = new Date(cursor.getLong(COL_MOVIE_RELEASE_DATE));
-                Movie movie = new Movie(
-                        cursor.getLong(COL_MOVIE_ID),
-                        cursor.getString(COL_MOVIE_TITLE),
-                        cursor.getString(COL_MOVIE_POSTER_URI),
-                        cursor.getString(COL_MOVIE_COVER_URI),
-                        cursor.getString(COL_MOVIE_SYNOPSIS),
-                        cursor.getDouble(COL_MOVIE_RATING),
-                        dateFormat.format(date)
-                );
+                Movie movie = Movie.fromCursor(cursor);
                 mMovies.add(movie);
             } while (cursor.moveToNext());
         }
     }
-
-    private static final String[] MOVIE_COLUMNS = {
-            MovieColumns._ID,
-            MovieColumns.TITLE,
-            MovieColumns.SYNOPSIS,
-            MovieColumns.RELEASE_DATE,
-            MovieColumns.RATING,
-            MovieColumns.POSTER_URI,
-            MovieColumns.COVER_URI
-    };
-
-    static final int COL_MOVIE_ID = 0;
-    static final int COL_MOVIE_TITLE = 1;
-    static final int COL_MOVIE_SYNOPSIS = 2;
-    static final int COL_MOVIE_RELEASE_DATE = 3;
-    static final int COL_MOVIE_RATING = 4;
-    static final int COL_MOVIE_POSTER_URI = 5;
-    static final int COL_MOVIE_COVER_URI = 6;
 
 }
