@@ -81,6 +81,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mPagerAdapter = new TrailerPagerAdapter(getFragmentManager());
         mPager.setAdapter(mPagerAdapter);
 
+        // http://img.youtube.com/vi/[VIDEO_ID]/maxresdefault.jpg
+        // retrieve posters with that url
+
         ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
 //        retrieveReviews(movie.getMovieId(), inflater, reviewContainer);
         mLayoutInflater = inflater;
