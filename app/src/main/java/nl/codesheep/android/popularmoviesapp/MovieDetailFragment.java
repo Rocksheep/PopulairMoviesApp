@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,19 +17,10 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
-import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 import nl.codesheep.android.popularmoviesapp.models.Review;
-import nl.codesheep.android.popularmoviesapp.rest.ReviewResponse;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.GsonConverterFactory;
-import retrofit.Response;
-import retrofit.Retrofit;
+import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -43,6 +35,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private LayoutInflater mLayoutInflater;
     private ViewGroup mReviewsParent;
 
+    private ViewPager mPager;
+    private TrailerPagerAdapter mPagerAdapter;
+
     public static MovieDetailFragment newInstance (Movie movie) {
         MovieDetailFragment detailFragment = new MovieDetailFragment();
 
@@ -55,6 +50,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     public MovieDetailFragment() {
 
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -77,6 +77,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mMovie = movie;
         getLoaderManager().initLoader(LOADER_ID, null, this);
 
+        mPager = (ViewPager) rootView.findViewById(R.id.detail_movie_trailer_pager);
+        mPagerAdapter = new TrailerPagerAdapter(getFragmentManager());
+        mPager.setAdapter(mPagerAdapter);
 
         ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
 //        retrieveReviews(movie.getMovieId(), inflater, reviewContainer);
@@ -110,42 +113,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         ratingBar.setRating((float) movie.getRating() / 2);
 
         return rootView;
-    }
-
-    private void retrieveReviews(long movieId, final LayoutInflater inflater, final ViewGroup parent) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MovieService.API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        MovieService.TheMovieDatabase service =
-                retrofit.create(MovieService.TheMovieDatabase.class);
-
-        String apiKey = getString(R.string.api_key);
-
-        Map<String, String> arguments = new HashMap<>();
-        arguments.put("api_key", apiKey);
-
-        Call<ReviewResponse> reviewResponseCall = service.reviews(movieId, arguments);
-        reviewResponseCall.enqueue(new Callback<ReviewResponse>() {
-            @Override
-            public void onResponse(Response<ReviewResponse> response) {
-                Log.d(LOG_TAG, response.raw().request().urlString());
-                if(response.body() != null) {
-                    for (Review review : response.body().results) {
-                        View view = inflater.inflate(R.layout.review, parent, false);
-                        TextView textView = (TextView) view.findViewById(R.id.review_text_view);
-                        textView.setText(review.content);
-                        parent.addView(view);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-
-            }
-        });
     }
 
     @Override

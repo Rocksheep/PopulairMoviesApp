@@ -70,13 +70,19 @@
                 android:layout_height="wrap_content" />
 
             <View style="@style/Divider"/>
-            <LinearLayout
-                android:orientation="vertical"
-                android:id="@+id/review_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
 
-            </LinearLayout>
+
+        </LinearLayout>
+        <nl.codesheep.android.popularmoviesapp.TrailerViewPager
+            android:id="@+id/detail_movie_trailer_pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/review_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp">
 
         </LinearLayout>
     </LinearLayout>
