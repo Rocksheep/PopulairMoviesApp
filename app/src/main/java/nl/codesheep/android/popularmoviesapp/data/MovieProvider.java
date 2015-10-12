@@ -30,6 +30,7 @@ public final class MovieProvider {
     interface Path {
         String MOVIES = "movies";
         String REVIEWS = "reviews";
+        String VIDEOS = "videos";
     }
 
     @TableEndpoint(table = MovieDatabase.MOVIES) public static class Movies {
@@ -58,6 +59,25 @@ public final class MovieProvider {
         )
         public static Uri fromMovie(long movieId) {
             return buildUri(Path.MOVIES, String.valueOf(movieId), Path.REVIEWS);
+        }
+    }
+
+    @TableEndpoint(table = MovieDatabase.VIDEOS) public static class Videos {
+        @ContentUri(
+                path = Path.VIDEOS,
+                type = "vnd.android.cursor.dir/video"
+        )
+        public static final Uri VIDEOS = buildUri(Path.VIDEOS);
+
+        @InexactContentUri(
+                path = Path.MOVIES + "/#/" + Path.VIDEOS,
+                name = "VIDEOS_OF_MOVIE",
+                type = "vnd.android.cursor.dir/video",
+                whereColumn = VideoColumns.MOVIE_KEY,
+                pathSegment = 1
+        )
+        public static Uri fromMovie(long movieId) {
+            return buildUri(Path.MOVIES, String.valueOf(movieId), Path.VIDEOS);
         }
     }
 }
