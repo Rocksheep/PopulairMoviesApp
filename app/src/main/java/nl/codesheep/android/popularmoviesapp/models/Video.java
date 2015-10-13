@@ -18,6 +18,7 @@ public class Video {
     }
 
     private static final String IMAGE_URL =  "http://img.youtube.com/vi/";
+    private static final String VIDEO_URL = "http://www.youtube.com/watch";
 
     public ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
@@ -31,6 +32,13 @@ public class Video {
         Uri uri = Uri.parse(IMAGE_URL).buildUpon()
                 .appendPath(key)
                 .appendPath(QUALITY.HQ)
+                .build();
+        return uri.toString();
+    }
+
+    public String getVideoUrl() {
+        Uri uri = Uri.parse(VIDEO_URL).buildUpon()
+                .appendQueryParameter("v", key)
                 .build();
         return uri.toString();
     }
