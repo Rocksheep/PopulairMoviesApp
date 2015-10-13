@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Call
                 getSupportFragmentManager().beginTransaction()
                         .replace(
                                 R.id.movie_detail_container,
-                                new MovieDetailFragment(),
+                                new PosterFragment(),
                                 DETAILFRAGMENT_TAG
                         )
                         .commit();

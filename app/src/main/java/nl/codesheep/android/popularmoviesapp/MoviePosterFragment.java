@@ -9,11 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
-import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 
@@ -26,6 +23,15 @@ public class MoviePosterFragment extends Fragment {
     private MovieAdapter mMovieAdapter;
     private ArrayList<Movie> mMovies = null;
 
+    public static MoviePosterFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        MoviePosterFragment fragment = new MoviePosterFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public MoviePosterFragment() {
 
     }
@@ -33,7 +39,7 @@ public class MoviePosterFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_poster, container, false);
 
         loadMovies();
         mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
