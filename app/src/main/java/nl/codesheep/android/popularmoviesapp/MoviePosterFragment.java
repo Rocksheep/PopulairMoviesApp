@@ -82,12 +82,14 @@ public class MoviePosterFragment extends Fragment {
                 null
         );
 
+        mMovies.clear();
         if (cursor.moveToFirst()) {
             do {
                 Movie movie = Movie.fromCursor(cursor);
                 mMovies.add(movie);
             } while (cursor.moveToNext());
         }
+        cursor.close();
     }
 
 }
