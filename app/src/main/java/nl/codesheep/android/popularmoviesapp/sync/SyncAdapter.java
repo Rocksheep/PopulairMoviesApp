@@ -135,11 +135,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void deletePreviousMovies() {
-        mContentResolver.delete(
-                MovieProvider.Movies.MOVIES,
-                null,
-                null
-        );
+        mContentResolver.delete(MovieProvider.Reviews.REVIEWS, null, null);
+        mContentResolver.delete(MovieProvider.Videos.VIDEOS, null, null);
+        mContentResolver.delete(MovieProvider.Movies.MOVIES, null, null);
     }
 
     public static void initializeSyncAdapter(Context context) {
