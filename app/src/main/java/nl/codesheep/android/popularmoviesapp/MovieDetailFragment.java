@@ -20,6 +20,7 @@ import com.squareup.picasso.Picasso;
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 import nl.codesheep.android.popularmoviesapp.models.Review;
+import nl.codesheep.android.popularmoviesapp.models.Video;
 import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 
 /**
@@ -81,11 +82,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mPagerAdapter = new TrailerPagerAdapter(getFragmentManager());
         mPager.setAdapter(mPagerAdapter);
 
-        // http://img.youtube.com/vi/[VIDEO_ID]/maxresdefault.jpg
-        // retrieve youtube thumbnails with that url
-
         ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
-//        retrieveReviews(movie.getMovieId(), inflater, reviewContainer);
         mLayoutInflater = inflater;
         mReviewsParent = reviewContainer;
 
@@ -114,6 +111,20 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         RatingBar ratingBar = (RatingBar) rootView.findViewById(R.id.detail_movie_rating);
         ratingBar.setRating((float) movie.getRating() / 2);
+
+        Cursor videoCursor = getContext().getContentResolver().query(
+                MovieProvider.Videos.fromMovie(movie.getMovieId()),
+                null,
+                null,
+                null,
+                null
+        );
+        if (videoCursor.moveToFirst()) {
+            do {
+                Video video = Video.fromCursor(videoCursor);
+                mPagerAdapter.add(video);
+            } while (videoCursor.moveToNext());
+        }
 
         return rootView;
     }

@@ -29,6 +29,7 @@ import nl.codesheep.android.popularmoviesapp.models.Movie;
 import nl.codesheep.android.popularmoviesapp.rest.MovieResponse;
 import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 import nl.codesheep.android.popularmoviesapp.sync.fetcher.ReviewSyncer;
+import nl.codesheep.android.popularmoviesapp.sync.fetcher.VideoSyncer;
 import retrofit.Call;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
@@ -92,7 +93,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     List<Movie> movies = response.body().results;
 
                     for (Movie movie : movies) {
-                        ReviewSyncer reviewSyncer = new ReviewSyncer(getContext());
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(MovieColumns.MOVIE_ID, movie.getMovieId());
                         contentValues.put(MovieColumns.COVER_URI, movie.getCoverUrl());
@@ -117,7 +117,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 contentValues
                         );
 
+                        ReviewSyncer reviewSyncer = new ReviewSyncer(getContext());
                         reviewSyncer.forMovie(movie.getMovieId()).sync();
+
+                        VideoSyncer videoSyncer = new VideoSyncer(getContext());
+                        videoSyncer.forMovie(movie.getMovieId()).sync();
                     }
                 }
             }
