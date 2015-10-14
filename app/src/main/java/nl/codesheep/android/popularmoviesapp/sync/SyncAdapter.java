@@ -7,12 +7,10 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.text.ParseException;
@@ -67,26 +65,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         String apiKey = getContext().getString(R.string.api_key);
 
-        SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        String order = preferences.getString(
-                getContext().getString(R.string.pref_order_key),
-                getContext().getString(R.string.pref_order_default)
-        );
-
         Map<String, String> arguments = new HashMap<>();
-        arguments.put("sort_by", order);
         arguments.put("api_key", apiKey);
-        arguments.put("vote_count.gte", "100");
 
-        Call<MovieResponse> movies = service.movies(arguments);
+        deletePreviousData();
+        Call<MovieResponse> popularMoviesCall = service.popularMovies(arguments);
         Log.d(LOG_TAG, "Enqueueing call");
-        movies.enqueue(new retrofit.Callback<MovieResponse>() {
+        syncMovies(popularMoviesCall);
+
+        Call<MovieResponse> topRatedMoviesCall = service.topRatedMovies(arguments);
+        syncMovies(topRatedMoviesCall);
+    }
+
+    private void syncMovies(Call<MovieResponse> call) {
+        call.enqueue(new retrofit.Callback<MovieResponse>() {
             @Override
             public void onResponse(Response<MovieResponse> response) {
-                deletePreviousReviews();
-                deletePreviousMovies();
                 Log.d(LOG_TAG, "Response received");
                 Log.d(LOG_TAG, response.raw().request().urlString());
                 if (response.body() != null) {
@@ -98,6 +92,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         contentValues.put(MovieColumns.COVER_URI, movie.getCoverUrl());
                         contentValues.put(MovieColumns.POSTER_URI, movie.getPosterUrl());
                         contentValues.put(MovieColumns.RATING, movie.getRating());
+                        contentValues.put(MovieColumns.POPULARITY, movie.getPopularity());
 
                         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                         long timestamp;
@@ -134,7 +129,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         });
     }
 
-    private void deletePreviousMovies() {
+    private void deletePreviousData() {
         mContentResolver.delete(MovieProvider.Reviews.REVIEWS, null, null);
         mContentResolver.delete(MovieProvider.Videos.VIDEOS, null, null);
         mContentResolver.delete(MovieProvider.Movies.MOVIES, null, null);

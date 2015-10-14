@@ -36,6 +36,9 @@ public class Movie implements Parcelable{
     @SerializedName("release_date")
     private String mReleaseDate;
 
+    @SerializedName("popularity")
+    private double mPopularity;
+
     public Movie(
             long movieId,
             String title,
@@ -43,7 +46,8 @@ public class Movie implements Parcelable{
             String coverUrl,
             String synopsis,
             double rating,
-            String releaseDate) {
+            String releaseDate,
+            double popularity) {
         mMovieId = movieId;
         mTitle = title;
         mPosterUrl = posterUrl;
@@ -52,6 +56,7 @@ public class Movie implements Parcelable{
         mRating = rating;
         mReleaseDate = releaseDate;
         mId = 0;
+        mPopularity = popularity;
     }
 
     protected Movie(Parcel in) {
@@ -63,6 +68,7 @@ public class Movie implements Parcelable{
         mSynopsis = in.readString();
         mRating = in.readDouble();
         mReleaseDate = in.readString();
+        mPopularity = in.readDouble();
     }
 
     public static Movie fromCursor(Cursor cursor) {
@@ -74,6 +80,7 @@ public class Movie implements Parcelable{
         int synopsisIndex = cursor.getColumnIndexOrThrow(MovieColumns.SYNOPSIS);
         int ratingIndex = cursor.getColumnIndexOrThrow(MovieColumns.RATING);
         int releaseDateIndex = cursor.getColumnIndexOrThrow(MovieColumns.RELEASE_DATE);
+        int popularityIndex = cursor.getColumnIndexOrThrow(MovieColumns.POPULARITY);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
         Date date = new Date(cursor.getLong(releaseDateIndex));
@@ -85,7 +92,8 @@ public class Movie implements Parcelable{
                 cursor.getString(coverUriIndex),
                 cursor.getString(synopsisIndex),
                 cursor.getDouble(ratingIndex),
-                dateFormat.format(date)
+                dateFormat.format(date),
+                cursor.getDouble(popularityIndex)
         );
         movie.setId(cursor.getLong(idIndex));
 
@@ -136,6 +144,14 @@ public class Movie implements Parcelable{
         return mRating;
     }
 
+    public double getPopularity() {
+        return mPopularity;
+    }
+
+    public void setPopularity(double popularity) {
+        mPopularity = popularity;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -151,6 +167,7 @@ public class Movie implements Parcelable{
         dest.writeString(mSynopsis);
         dest.writeDouble(mRating);
         dest.writeString(mReleaseDate);
+        dest.writeDouble(mPopularity);
     }
 
     public long getMovieId() {

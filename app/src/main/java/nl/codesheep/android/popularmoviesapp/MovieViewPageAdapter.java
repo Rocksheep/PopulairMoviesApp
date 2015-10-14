@@ -3,6 +3,8 @@ package nl.codesheep.android.popularmoviesapp;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
+
 public class MovieViewPageAdapter extends FragmentPagerAdapter {
 
     public MovieViewPageAdapter(FragmentManager fm) {
@@ -24,7 +26,17 @@ public class MovieViewPageAdapter extends FragmentPagerAdapter {
 
     @Override
     public android.support.v4.app.Fragment getItem(int position) {
-        return MoviePosterFragment.newInstance();
+        String orderBy;
+        switch (position) {
+            default:
+            case 0:
+                orderBy = MovieColumns.POPULARITY;
+                break;
+            case 1:
+                orderBy = MovieColumns.RATING;
+                break;
+        }
+        return MoviePosterFragment.newInstance(orderBy);
     }
 
     @Override

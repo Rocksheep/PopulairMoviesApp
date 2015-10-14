@@ -13,8 +13,11 @@ public final class MovieService {
     public static final String COVER_URL = "http://image.tmdb.org/t/p/w780";
 
     public interface TheMovieDatabase {
-        @GET("discover/movie")
-        Call<MovieResponse> movies(@QueryMap Map<String, String> options);
+        @GET("movie/popular")
+        Call<MovieResponse> popularMovies(@QueryMap Map<String, String> options);
+
+        @GET("movie/top_rated")
+        Call<MovieResponse> topRatedMovies(@QueryMap Map<String, String> options);
 
         @GET("movie/{id}/reviews")
         Call<ReviewResponse> reviews(@Path("id") long id, @QueryMap Map<String, String> options);

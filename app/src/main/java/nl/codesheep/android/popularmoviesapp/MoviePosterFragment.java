@@ -20,13 +20,16 @@ import nl.codesheep.android.popularmoviesapp.models.Movie;
 public class MoviePosterFragment extends Fragment {
 
     private static final String LOG_TAG = MoviePosterFragment.class.getSimpleName();
+    private static final String ARG_ORDER_BY = "order_by";
+
     private MovieAdapter mMovieAdapter;
     private ArrayList<Movie> mMovies = null;
 
-    public static MoviePosterFragment newInstance() {
+    public static MoviePosterFragment newInstance(String orderBy) {
 
         Bundle args = new Bundle();
 
+        args.putString(ARG_ORDER_BY, orderBy);
         MoviePosterFragment fragment = new MoviePosterFragment();
         fragment.setArguments(args);
         return fragment;
@@ -41,7 +44,13 @@ public class MoviePosterFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_poster, container, false);
 
-        loadMovies();
+        Bundle args = getArguments();
+        String orderBy = "popularity";
+        if (args != null && args.containsKey(ARG_ORDER_BY)) {
+            orderBy = args.getString(ARG_ORDER_BY);
+        }
+
+        loadMovies(orderBy);
         mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
@@ -68,7 +77,7 @@ public class MoviePosterFragment extends Fragment {
         super.onStart();
     }
 
-    private void loadMovies() {
+    private void loadMovies(String orderBy) {
 
         if (mMovies == null) {
             mMovies = new ArrayList<>();
@@ -79,7 +88,7 @@ public class MoviePosterFragment extends Fragment {
                 null,
                 null,
                 null,
-                null
+                orderBy + " DESC LIMIT 20"
         );
 
         mMovies.clear();
