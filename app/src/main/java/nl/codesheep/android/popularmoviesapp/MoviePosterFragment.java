@@ -1,16 +1,21 @@
 package nl.codesheep.android.popularmoviesapp;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import nl.codesheep.android.popularmoviesapp.data.FavoriteColumns;
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 
@@ -40,6 +45,11 @@ public class MoviePosterFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_poster, container, false);
@@ -54,16 +64,6 @@ public class MoviePosterFragment extends Fragment {
         mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup(){
-
-            @Override
-            public int getSpanSize(int position) {
-                if (position % 3 == 2) {
-                    return 2;
-                }
-                return 1;
-            }
-        });
 
         RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.movie_recycler_view);
         recyclerView.setAdapter(mMovieAdapter);

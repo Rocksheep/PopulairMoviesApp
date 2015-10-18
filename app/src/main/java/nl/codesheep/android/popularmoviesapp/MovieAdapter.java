@@ -22,10 +22,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     private ArrayList<Movie> mMovies;
     private Context mContext;
-    private Cursor mCursor;
-
-    private static final int POSTER_VIEW = 0;
-    private static final int POSTER_DETAIL_VIEW = 1;
 
     public MovieAdapter(Context context, ArrayList<Movie> movies) {
         mContext = context;
@@ -36,24 +32,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         return mMovies.get(position);
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        return position % 3 == 2 ? POSTER_DETAIL_VIEW : POSTER_VIEW;
-    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view;
-        if (viewType == POSTER_VIEW) {
-            view = LayoutInflater.from(parent.getContext())
+        View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.movie_poster, parent, false);
-        }
-        else {
-            view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.movie_poster_big, parent, false);
-        }
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -68,10 +52,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
                 .load(MovieService.POSTER_URL + posterUrl)
                 .placeholder(R.drawable.placeholder)
                 .into(holder.imageView);
-
-        if (getItemViewType(position) == POSTER_DETAIL_VIEW) {
-            holder.descriptionTextView.setText(mMovies.get(position).getSynopsis());
-        }
     }
 
     @Override

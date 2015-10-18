@@ -31,6 +31,7 @@ public final class MovieProvider {
         String MOVIES = "movies";
         String REVIEWS = "reviews";
         String VIDEOS = "videos";
+        String FAVORITES = "favorites";
     }
 
     @TableEndpoint(table = MovieDatabase.MOVIES) public static class Movies {
@@ -79,5 +80,18 @@ public final class MovieProvider {
         public static Uri fromMovie(long movieId) {
             return buildUri(Path.MOVIES, String.valueOf(movieId), Path.VIDEOS);
         }
+    }
+
+    @TableEndpoint(table = MovieDatabase.FAVORITES) public static class Favorites {
+
+        @ContentUri(
+                path = Path.FAVORITES,
+                type = "vnd.android.cursor.dir/favorite",
+                join = "LEFT JOIN " + MovieDatabase.MOVIES + " on " +
+                        MovieDatabase.FAVORITES + "." + FavoriteColumns.MOVIE_KEY + " = " +
+                        MovieDatabase.MOVIES + "." + MovieColumns.MOVIE_ID
+        )
+        public static Uri FAVORITES = buildUri(Path.FAVORITES);
+
     }
 }

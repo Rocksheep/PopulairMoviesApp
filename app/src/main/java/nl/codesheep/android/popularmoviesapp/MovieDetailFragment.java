@@ -1,5 +1,6 @@
 package nl.codesheep.android.popularmoviesapp;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,9 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,6 +21,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import nl.codesheep.android.popularmoviesapp.data.FavoriteColumns;
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 import nl.codesheep.android.popularmoviesapp.models.Review;
@@ -56,6 +61,27 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_detail, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.mark_as_favorite) {
+            ContentValues values = new ContentValues();
+            values.put(FavoriteColumns.MOVIE_KEY, mMovie.getMovieId());
+            getActivity().getContentResolver().insert(
+                MovieProvider.Favorites.FAVORITES,
+                    values
+            );
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

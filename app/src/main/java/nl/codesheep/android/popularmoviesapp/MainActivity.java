@@ -1,11 +1,14 @@
 package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 import nl.codesheep.android.popularmoviesapp.sync.SyncAdapter;
 
@@ -36,6 +39,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Call
         else {
             mTwoPane = false;
         }
+
+        Cursor cursor = getContentResolver().query(
+                MovieProvider.Favorites.FAVORITES,
+                null,
+                null,
+                null,
+                null
+        );
+
+        Log.d(LOG_TAG, "Num of favorites: " + cursor.getCount());
+        if (cursor.moveToFirst()) {
+            do {
+                Movie movie = Movie.fromCursor(cursor);
+                Log.d(LOG_TAG, "Favorite movie: " + movie.getTitle());
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
 
         SyncAdapter.initializeSyncAdapter(this);
     }
