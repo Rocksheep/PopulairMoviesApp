@@ -1,7 +1,6 @@
 package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -88,6 +87,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             }
 
         }
+    }
+
+    public void setMovies(ArrayList<Movie> movies) {
+        mMovies = movies;
+        notifyDataSetChanged();
     }
 
     public interface Callback {

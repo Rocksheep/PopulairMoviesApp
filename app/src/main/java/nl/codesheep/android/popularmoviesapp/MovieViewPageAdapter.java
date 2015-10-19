@@ -27,6 +27,7 @@ public class MovieViewPageAdapter extends FragmentPagerAdapter {
     @Override
     public android.support.v4.app.Fragment getItem(int position) {
         String orderBy;
+        boolean showFavorites = false;
         switch (position) {
             default:
             case 0:
@@ -35,8 +36,13 @@ public class MovieViewPageAdapter extends FragmentPagerAdapter {
             case 1:
                 orderBy = MovieColumns.RATING;
                 break;
+            case 2:
+                orderBy = MovieColumns.POPULARITY;
+                showFavorites = true;
+                break;
+
         }
-        return MoviePosterFragment.newInstance(orderBy);
+        return MoviePosterFragment.newInstance(orderBy, showFavorites);
     }
 
     @Override
