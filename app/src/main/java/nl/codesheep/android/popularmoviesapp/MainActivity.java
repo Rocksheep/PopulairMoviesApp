@@ -40,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Call
             mTwoPane = false;
         }
 
+        String whereStatement = "is_favorite = ?";
+        String[] whereArgs = new String[] { "1" };
+
         Cursor cursor = getContentResolver().query(
                 MovieProvider.Favorites.FAVORITES,
                 null,

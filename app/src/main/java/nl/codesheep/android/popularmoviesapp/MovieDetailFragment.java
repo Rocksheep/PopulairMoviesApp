@@ -3,6 +3,7 @@ package nl.codesheep.android.popularmoviesapp;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -10,9 +11,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -35,7 +33,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     private static final String MOVIE_KEY = "movie";
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
-    private static final int LOADER_ID = 1;
+
+    private static final int LOADER_MOVIE = 0;
+    private static final int LOADER_REVIEWS = 1;
+    private static final int LOADER_VIDEOS = 2;
     private Movie mMovie;
 
     private LayoutInflater mLayoutInflater;
@@ -59,32 +60,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_detail, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.mark_as_favorite) {
-            ContentValues values = new ContentValues();
-            values.put(FavoriteColumns.MOVIE_KEY, mMovie.getMovieId());
-            getActivity().getContentResolver().insert(
-                MovieProvider.Favorites.FAVORITES,
-                    values
-            );
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
@@ -92,17 +67,49 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         Movie movie;
         Bundle bundle = getArguments();
         if (bundle != null) {
-            movie = bundle.getParcelable("movie");
+            movie = bundle.getParcelable(MOVIE_KEY);
         }
         else {
             Bundle extras = getActivity().getIntent().getExtras();
-            movie = extras.getParcelable("movie");
+            movie = extras.getParcelable(MOVIE_KEY);
         }
         if (movie == null) {
             return rootView;
         }
         mMovie = movie;
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        final FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.favorite_fab);
+        if (mMovie.isFavorite()) {
+            fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_white_48dp));
+        }
+        else {
+            fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_border_white_48dp));
+        }
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mMovie.isFavorite()) {
+                    getActivity().getContentResolver().delete(
+                            MovieProvider.Favorites.FAVORITES,
+                            FavoriteColumns.MOVIE_KEY + " = ?",
+                            new String[]{ Long.toString(mMovie.getMovieId()) }
+                    );
+                    fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_border_white_48dp));
+                }
+                else {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(FavoriteColumns.MOVIE_KEY, mMovie.getMovieId());
+                    getActivity().getContentResolver().insert(
+                            MovieProvider.Favorites.FAVORITES,
+                            contentValues
+                    );
+                    fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_white_48dp));
+                }
+            }
+        });
+
+        getLoaderManager().initLoader(LOADER_REVIEWS, null, this);
+        getLoaderManager().initLoader(LOADER_VIDEOS, null, this);
 
         mPager = (ViewPager) rootView.findViewById(R.id.detail_movie_trailer_pager);
         mPagerAdapter = new TrailerPagerAdapter(getFragmentManager());
@@ -138,20 +145,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         RatingBar ratingBar = (RatingBar) rootView.findViewById(R.id.detail_movie_rating);
         ratingBar.setRating((float) movie.getRating() / 2);
 
-        Cursor videoCursor = getContext().getContentResolver().query(
-                MovieProvider.Videos.fromMovie(movie.getMovieId()),
-                null,
-                null,
-                null,
-                null
-        );
-        if (videoCursor.moveToFirst()) {
-            do {
-                Video video = Video.fromCursor(videoCursor);
-                mPagerAdapter.add(video);
-            } while (videoCursor.moveToNext());
-        }
-
         return rootView;
     }
 
@@ -159,31 +152,59 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (mMovie == null) return null;
 
-        return new CursorLoader(
-                getActivity(),
-                MovieProvider.Reviews.fromMovie(mMovie.getMovieId()),
-                null,
-                null,
-                null,
-                null
-        );
+        if (id == LOADER_REVIEWS) {
+            return new CursorLoader(
+                    getActivity(),
+                    MovieProvider.Reviews.fromMovie(mMovie.getMovieId()),
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+        if (id == LOADER_VIDEOS) {
+            return new CursorLoader(
+                    getActivity(),
+                    MovieProvider.Videos.fromMovie(mMovie.getMovieId()),
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.d(LOG_TAG, "onLoadFinished has been called");
-        if (!cursor.moveToFirst()) {
-            Log.d(LOG_TAG, "No reviews found");
-            return;
+        if (loader.getId() == LOADER_REVIEWS) {
+            Log.d(LOG_TAG, "onLoadFinished has been called");
+            if (!cursor.moveToFirst()) {
+                Log.d(LOG_TAG, "No reviews found");
+                return;
+            }
+            do {
+                Review review = Review.fromCursor(cursor);
+                Log.d(LOG_TAG, review.author);
+                View view = mLayoutInflater.inflate(R.layout.review, mReviewsParent, false);
+                TextView textView = (TextView) view.findViewById(R.id.review_text_view);
+                textView.setText(review.content);
+                mReviewsParent.addView(view);
+            } while (cursor.moveToNext());
         }
-        do {
-            Review review = Review.fromCursor(cursor);
-            Log.d(LOG_TAG, review.author);
-            View view = mLayoutInflater.inflate(R.layout.review, mReviewsParent, false);
-            TextView textView = (TextView) view.findViewById(R.id.review_text_view);
-            textView.setText(review.content);
-            mReviewsParent.addView(view);
-        } while (cursor.moveToNext());
+
+        if (loader.getId() == LOADER_VIDEOS) {
+            if (cursor.moveToFirst()) {
+                do {
+                    Video video = Video.fromCursor(cursor);
+                    mPagerAdapter.add(video);
+                } while (cursor.moveToNext());
+            }
+            else {
+                Log.d(LOG_TAG, "No videos found");
+            }
+        }
     }
 
     @Override

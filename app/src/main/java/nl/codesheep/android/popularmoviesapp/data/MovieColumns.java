@@ -20,4 +20,13 @@ public interface MovieColumns {
     @DataType(DataType.Type.INTEGER) @NotNull String RELEASE_DATE = "release_date";
     @DataType(DataType.Type.REAL) @NotNull String POPULARITY = "popularity";
 
+    String IS_FAVORITE = "is_favorite";
+
+    public static final String[] PROJECTION = new String[] {
+            MovieColumns._ID, MovieColumns.MOVIE_ID, MovieColumns.COVER_URI,
+            MovieColumns.IS_FAVORITE, MovieColumns.POPULARITY, MovieColumns.POSTER_URI,
+            MovieColumns.RATING, MovieColumns.RELEASE_DATE, MovieColumns.SYNOPSIS,
+            MovieColumns.TITLE
+    };
+
 }

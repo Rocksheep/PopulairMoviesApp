@@ -3,6 +3,7 @@ package nl.codesheep.android.popularmoviesapp.models;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -39,6 +40,8 @@ public class Movie implements Parcelable{
     @SerializedName("popularity")
     private double mPopularity;
 
+    private boolean mIsFavorite;
+
     public Movie(
             long movieId,
             String title,
@@ -69,6 +72,7 @@ public class Movie implements Parcelable{
         mRating = in.readDouble();
         mReleaseDate = in.readString();
         mPopularity = in.readDouble();
+        mIsFavorite = in.readByte() == 1;
     }
 
     public static Movie fromCursor(Cursor cursor) {
@@ -81,6 +85,7 @@ public class Movie implements Parcelable{
         int ratingIndex = cursor.getColumnIndexOrThrow(MovieColumns.RATING);
         int releaseDateIndex = cursor.getColumnIndexOrThrow(MovieColumns.RELEASE_DATE);
         int popularityIndex = cursor.getColumnIndexOrThrow(MovieColumns.POPULARITY);
+        int favoriteIndex = cursor.getColumnIndex(MovieColumns.IS_FAVORITE);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
         Date date = new Date(cursor.getLong(releaseDateIndex));
@@ -95,6 +100,12 @@ public class Movie implements Parcelable{
                 dateFormat.format(date),
                 cursor.getDouble(popularityIndex)
         );
+
+        if (favoriteIndex != -1) {
+            movie.setIsFavorite(cursor.getInt(favoriteIndex) == 1);
+            Log.d(Movie.class.getSimpleName(), movie.getTitle() + ": favorited " + Integer.toString(cursor.getInt(favoriteIndex)));
+        }
+
         movie.setId(cursor.getLong(idIndex));
 
         return movie;
@@ -168,9 +179,18 @@ public class Movie implements Parcelable{
         dest.writeDouble(mRating);
         dest.writeString(mReleaseDate);
         dest.writeDouble(mPopularity);
+        dest.writeByte((byte) (mIsFavorite ? 1 : 0));
     }
 
     public long getMovieId() {
         return mMovieId;
+    }
+
+    public void setIsFavorite(boolean isFavorite) {
+        mIsFavorite = isFavorite;
+    }
+
+    public boolean isFavorite() {
+        return mIsFavorite;
     }
 }

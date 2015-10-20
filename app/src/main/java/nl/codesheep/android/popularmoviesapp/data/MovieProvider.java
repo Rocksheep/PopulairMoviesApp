@@ -1,11 +1,16 @@
 package nl.codesheep.android.popularmoviesapp.data;
 
 import android.net.Uri;
+import android.util.Log;
 
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
 import net.simonvt.schematic.annotation.InexactContentUri;
+import net.simonvt.schematic.annotation.MapColumns;
 import net.simonvt.schematic.annotation.TableEndpoint;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ContentProvider(authority = MovieProvider.AUTHORITY, database = MovieDatabase.class)
 public final class MovieProvider {
@@ -36,11 +41,31 @@ public final class MovieProvider {
 
     @TableEndpoint(table = MovieDatabase.MOVIES) public static class Movies {
 
+        @MapColumns public static Map<String, String> mapColumns() {
+            Map<String, String> map = new HashMap<>();
+            map.put(MovieColumns.IS_FAVORITE, IS_FAVORITE);
+            Log.d(MovieProvider.class.getSimpleName(), IS_FAVORITE);
+            return map;
+        }
+
         @ContentUri(
                 path = Path.MOVIES,
                 type = "vnd.android.cursor.dir/movie"
+
         )
         public static final Uri MOVIES = buildUri(Path.MOVIES);
+
+        static final String IS_FAVORITE = "(SELECT COUNT(*) FROM "
+                + MovieDatabase.FAVORITES
+                + " WHERE "
+                + MovieDatabase.FAVORITES
+                + "."
+                + FavoriteColumns.MOVIE_KEY
+                + "="
+                + MovieDatabase.MOVIES
+                + "."
+                + MovieColumns.MOVIE_ID
+                + ")";
 
     }
 

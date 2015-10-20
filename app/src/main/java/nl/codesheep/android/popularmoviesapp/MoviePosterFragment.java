@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 
@@ -93,20 +94,20 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Uri uri;
+        Uri uri = MovieProvider.Movies.MOVIES;
+        String whereStatement = null;
+        String[] whereArgs = null;
         if (mShowFavorites) {
-            uri = MovieProvider.Favorites.FAVORITES;
-        }
-        else {
-            uri = MovieProvider.Movies.MOVIES;
+            whereStatement = MovieColumns.IS_FAVORITE + " = 1";
+            Log.d(LOG_TAG, "is_favorite > 0");
         }
         Log.d(LOG_TAG, "Created loader for URL: " + uri.toString() + "/" + mOrderBy);
         return new CursorLoader(
                 getActivity(),
                 uri,
-                null,
-                null,
-                null,
+                MovieColumns.PROJECTION,
+                whereStatement,
+                whereArgs,
                 mOrderBy + " DESC LIMIT 20"
         );
     }
@@ -114,7 +115,7 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mMovies.clear();
-
+        Log.d(LOG_TAG, "Num results: " + cursor.getCount());
         if (cursor.moveToFirst()) {
             do {
                 Movie movie = Movie.fromCursor(cursor);
