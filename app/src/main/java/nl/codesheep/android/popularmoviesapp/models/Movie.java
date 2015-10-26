@@ -3,7 +3,6 @@ package nl.codesheep.android.popularmoviesapp.models;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -103,7 +102,6 @@ public class Movie implements Parcelable{
 
         if (favoriteIndex != -1) {
             movie.setIsFavorite(cursor.getInt(favoriteIndex) == 1);
-            Log.d(Movie.class.getSimpleName(), movie.getTitle() + ": favorited " + Integer.toString(cursor.getInt(favoriteIndex)));
         }
 
         movie.setId(cursor.getLong(idIndex));

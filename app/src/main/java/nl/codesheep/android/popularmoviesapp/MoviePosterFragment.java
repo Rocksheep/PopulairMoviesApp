@@ -53,6 +53,7 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(LOG_TAG, "I have been created");
         mMovies = new ArrayList<>();
 
         Bundle args = getArguments();
@@ -68,12 +69,15 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
         }
         mOrderBy = orderBy;
         mShowFavorites = showFavorites;
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
+
+    
 
     @Override
     public void onResume() {
         super.onResume();
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override
@@ -99,7 +103,6 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
         String[] whereArgs = null;
         if (mShowFavorites) {
             whereStatement = MovieColumns.IS_FAVORITE + " = 1";
-            Log.d(LOG_TAG, "is_favorite > 0");
         }
         Log.d(LOG_TAG, "Created loader for URL: " + uri.toString() + "/" + mOrderBy);
         return new CursorLoader(
@@ -115,13 +118,13 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mMovies.clear();
-        Log.d(LOG_TAG, "Num results: " + cursor.getCount());
         if (cursor.moveToFirst()) {
             do {
                 Movie movie = Movie.fromCursor(cursor);
                 mMovies.add(movie);
             } while (cursor.moveToNext());
         }
+        Log.d(LOG_TAG, "Movie set changed");
         mMovieAdapter.setMovies(mMovies);
     }
 

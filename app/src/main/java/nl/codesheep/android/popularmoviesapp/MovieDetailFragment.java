@@ -9,7 +9,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +25,6 @@ import nl.codesheep.android.popularmoviesapp.models.Review;
 import nl.codesheep.android.popularmoviesapp.models.Video;
 import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String MOVIE_KEY = "movie";
@@ -179,14 +175,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (loader.getId() == LOADER_REVIEWS) {
-            Log.d(LOG_TAG, "onLoadFinished has been called");
             if (!cursor.moveToFirst()) {
-                Log.d(LOG_TAG, "No reviews found");
                 return;
             }
             do {
                 Review review = Review.fromCursor(cursor);
-                Log.d(LOG_TAG, review.author);
                 View view = mLayoutInflater.inflate(R.layout.review, mReviewsParent, false);
                 TextView textView = (TextView) view.findViewById(R.id.review_text_view);
                 textView.setText(review.content);
@@ -201,9 +194,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     mPagerAdapter.add(video);
                 } while (cursor.moveToNext());
             }
-            else {
-                Log.d(LOG_TAG, "No videos found");
-            }
         }
     }
 
@@ -211,4 +201,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+
+    
 }

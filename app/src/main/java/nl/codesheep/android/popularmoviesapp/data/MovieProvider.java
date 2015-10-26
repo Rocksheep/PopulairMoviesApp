@@ -1,7 +1,6 @@
 package nl.codesheep.android.popularmoviesapp.data;
 
 import android.net.Uri;
-import android.util.Log;
 
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
@@ -44,7 +43,6 @@ public final class MovieProvider {
         @MapColumns public static Map<String, String> mapColumns() {
             Map<String, String> map = new HashMap<>();
             map.put(MovieColumns.IS_FAVORITE, IS_FAVORITE);
-            Log.d(MovieProvider.class.getSimpleName(), IS_FAVORITE);
             return map;
         }
 
