@@ -9,6 +9,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,12 +89,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     getActivity().getContentResolver().delete(
                             MovieProvider.Favorites.FAVORITES,
                             FavoriteColumns.MOVIE_KEY + " = ?",
-                            new String[]{ Long.toString(mMovie.getMovieId()) }
+                            new String[]{Long.toString(mMovie.getMovieId())}
                     );
                     fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_border_white_48dp));
                     mMovie.setIsFavorite(false);
-                }
-                else {
+                } else {
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(FavoriteColumns.MOVIE_KEY, mMovie.getMovieId());
                     getActivity().getContentResolver().insert(
@@ -105,9 +105,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 }
             }
         });
-
-        getLoaderManager().initLoader(LOADER_REVIEWS, null, this);
-        getLoaderManager().initLoader(LOADER_VIDEOS, null, this);
 
         mPager = (ViewPager) rootView.findViewById(R.id.detail_movie_trailer_pager);
         mPagerAdapter = new TrailerPagerAdapter(getFragmentManager());
@@ -143,6 +140,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         RatingBar ratingBar = (RatingBar) rootView.findViewById(R.id.detail_movie_rating);
         ratingBar.setRating((float) movie.getRating() / 2);
+
+        getLoaderManager().initLoader(LOADER_REVIEWS, null, this);
+        getLoaderManager().initLoader(LOADER_VIDEOS, null, this);
 
         return rootView;
     }
@@ -192,8 +192,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         }
 
         if (loader.getId() == LOADER_VIDEOS) {
+            mPagerAdapter.clear();
             if (cursor.moveToFirst()) {
                 do {
+                    Log.d(LOG_TAG, "Adding video");
                     Video video = Video.fromCursor(cursor);
                     mPagerAdapter.add(video);
                 } while (cursor.moveToNext());

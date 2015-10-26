@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ public class TrailerFragment extends Fragment {
 
     private static final String THUMB_URL = "thumbnail_url";
     private static final String VIDEO_URL = "video_url";
+    private static final String LOG_TAG = TrailerFragment.class.getSimpleName();
 
     public static TrailerFragment newInstance(Video video) {
 
@@ -30,7 +32,7 @@ public class TrailerFragment extends Fragment {
     }
 
     public TrailerFragment() {
-        // Required empty public constructor
+        // Required :empty public constructor
     }
 
     @Override
@@ -38,6 +40,7 @@ public class TrailerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.frament_trailer, container, false);
         ImageView imageView = (ImageView) rootView.findViewById(R.id.trailer_image_view);
+        Log.d(LOG_TAG, "Creating trailer fragment");
 
         Bundle args = getArguments();
         if (args == null) {

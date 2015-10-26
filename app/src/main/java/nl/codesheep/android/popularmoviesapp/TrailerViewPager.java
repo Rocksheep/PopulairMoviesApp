@@ -20,7 +20,7 @@ public class TrailerViewPager extends ViewPager {
     // http://stackoverflow.com/questions/8394681/android-i-am-unable-to-have-viewpager-wrap-content
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int height = 0;
+        int height = 500;
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             child.measure(widthMeasureSpec, MeasureSpec.UNSPECIFIED);

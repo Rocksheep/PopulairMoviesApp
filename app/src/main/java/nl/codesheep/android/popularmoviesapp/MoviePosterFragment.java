@@ -57,6 +57,7 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
         super.onCreate(savedInstanceState);
         Log.d(LOG_TAG, "I have been created");
         mMovies = new ArrayList<>();
+        mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
 
         Bundle args = getArguments();
         String orderBy = "popularity";
@@ -86,8 +87,6 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_poster, container, false);
-
-        mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
 
         int columns = sUseWideView ? 3 : 2;
 
