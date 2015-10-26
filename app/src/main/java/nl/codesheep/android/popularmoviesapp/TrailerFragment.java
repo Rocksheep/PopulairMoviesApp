@@ -45,7 +45,10 @@ public class TrailerFragment extends Fragment {
         }
         String thumbnailUrl = args.getString(THUMB_URL);
         final String videoUrl = args.getString(VIDEO_URL);
-        Picasso.with(getActivity()).load(thumbnailUrl).into(imageView);
+        Picasso.with(getActivity())
+                .load(thumbnailUrl)
+                .placeholder(R.drawable.backdrop_placeholder)
+                .into(imageView);
 
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override

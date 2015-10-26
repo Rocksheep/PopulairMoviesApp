@@ -91,6 +91,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             new String[]{ Long.toString(mMovie.getMovieId()) }
                     );
                     fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_border_white_48dp));
+                    mMovie.setIsFavorite(false);
                 }
                 else {
                     ContentValues contentValues = new ContentValues();
@@ -100,6 +101,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             contentValues
                     );
                     fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_white_48dp));
+                    mMovie.setIsFavorite(true);
                 }
             }
         });
@@ -119,7 +121,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 rootView.findViewById(R.id.detail_movie_cover_image_view);
 
         Picasso.with(getActivity())
-                .load(MovieService.COVER_URL + movie.getCoverUrl()).into(coverImageView);
+                .load(MovieService.COVER_URL + movie.getCoverUrl())
+                .placeholder(R.drawable.backdrop_placeholder).into(coverImageView);
 
         ImageView posterImageView = (ImageView)
                 rootView.findViewById(R.id.detail_movie_poster_image_view);
@@ -178,6 +181,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             if (!cursor.moveToFirst()) {
                 return;
             }
+            mReviewsParent.removeAllViews();
             do {
                 Review review = Review.fromCursor(cursor);
                 View view = mLayoutInflater.inflate(R.layout.review, mReviewsParent, false);
@@ -202,5 +206,5 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     }
 
-    
+
 }

@@ -1,14 +1,12 @@
 package nl.codesheep.android.popularmoviesapp;
 
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
 import nl.codesheep.android.popularmoviesapp.models.Movie;
 import nl.codesheep.android.popularmoviesapp.sync.SyncAdapter;
 
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Call
                 getSupportFragmentManager().beginTransaction()
                         .replace(
                                 R.id.movie_detail_container,
-                                new PosterFragment(),
+                                MovieDetailFragment.newInstance(null),
                                 DETAILFRAGMENT_TAG
                         )
                         .commit();
@@ -40,25 +38,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Call
             mTwoPane = false;
         }
 
-        String whereStatement = "is_favorite = ?";
-        String[] whereArgs = new String[] { "1" };
-
-        Cursor cursor = getContentResolver().query(
-                MovieProvider.Favorites.FAVORITES,
-                null,
-                null,
-                null,
-                null
-        );
-
-        Log.d(LOG_TAG, "Num of favorites: " + cursor.getCount());
-        if (cursor.moveToFirst()) {
-            do {
-                Movie movie = Movie.fromCursor(cursor);
-                Log.d(LOG_TAG, "Favorite movie: " + movie.getTitle());
-            } while (cursor.moveToNext());
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            MoviePosterFragment.setUseWideView(true);
         }
-        cursor.close();
+        else {
+            MoviePosterFragment.setUseWideView(false);
+        }
 
         SyncAdapter.initializeSyncAdapter(this);
     }

@@ -1,11 +1,14 @@
 package nl.codesheep.android.popularmoviesapp.data;
 
+import android.content.ContentValues;
 import android.net.Uri;
 
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
 import net.simonvt.schematic.annotation.InexactContentUri;
 import net.simonvt.schematic.annotation.MapColumns;
+import net.simonvt.schematic.annotation.NotifyDelete;
+import net.simonvt.schematic.annotation.NotifyInsert;
 import net.simonvt.schematic.annotation.TableEndpoint;
 
 import java.util.HashMap;
@@ -116,5 +119,14 @@ public final class MovieProvider {
         )
         public static Uri FAVORITES = buildUri(Path.FAVORITES);
 
+        @NotifyInsert(paths = Path.FAVORITES)
+        public static Uri[] onInsert(ContentValues values) {
+            return new Uri[] { Movies.MOVIES };
+        }
+
+        @NotifyDelete(paths = Path.FAVORITES)
+        public static Uri[] onDelete() {
+            return new Uri[] { Movies.MOVIES };
+        }
     }
 }

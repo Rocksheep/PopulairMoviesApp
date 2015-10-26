@@ -35,6 +35,8 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
     private String mOrderBy;
     private boolean mShowFavorites;
 
+    private static boolean sUseWideView = false;
+
 
     public static MoviePosterFragment newInstance(String orderBy, boolean showFavorites) {
         Bundle args = new Bundle();
@@ -87,7 +89,9 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
 
         mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        int columns = sUseWideView ? 3 : 2;
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), columns);
 
         RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.movie_recycler_view);
         recyclerView.setAdapter(mMovieAdapter);
@@ -126,10 +130,15 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
         }
         Log.d(LOG_TAG, "Movie set changed");
         mMovieAdapter.setMovies(mMovies);
+        mMovieAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    public static void setUseWideView(boolean useWideView) {
+        sUseWideView = useWideView;
     }
 }
