@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -29,12 +30,15 @@ import nl.codesheep.android.popularmoviesapp.rest.MovieService;
 public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String MOVIE_KEY = "movie";
+    private static final String SCROLLVIEW_POSITION_KEY = "scroll_position";
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
     private static final int LOADER_MOVIE = 0;
     private static final int LOADER_REVIEWS = 1;
     private static final int LOADER_VIDEOS = 2;
     private Movie mMovie;
+    private ScrollView mScrollView;
+    private int mPosition;
 
     private LayoutInflater mLayoutInflater;
     private ViewGroup mReviewsParent;
@@ -57,18 +61,35 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mPosition = 0;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-        Movie movie;
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            movie = bundle.getParcelable(MOVIE_KEY);
+        Movie movie = null;
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(MOVIE_KEY)) {
+                movie = savedInstanceState.getParcelable(MOVIE_KEY);
+            }
+            if (savedInstanceState.containsKey(SCROLLVIEW_POSITION_KEY)) {
+                mPosition = savedInstanceState.getInt(SCROLLVIEW_POSITION_KEY);
+                Log.d(LOG_TAG, "Scroll position = " + mPosition);
+            }
         }
         else {
-            Bundle extras = getActivity().getIntent().getExtras();
-            movie = extras.getParcelable(MOVIE_KEY);
+            Bundle bundle = getArguments();
+            if (bundle != null) {
+                movie = bundle.getParcelable(MOVIE_KEY);
+            } else {
+                Bundle extras = getActivity().getIntent().getExtras();
+                movie = extras.getParcelable(MOVIE_KEY);
+            }
         }
         if (movie == null) {
             return rootView;
@@ -144,6 +165,15 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         getLoaderManager().initLoader(LOADER_REVIEWS, null, this);
         getLoaderManager().initLoader(LOADER_VIDEOS, null, this);
 
+        mScrollView = (ScrollView) rootView;
+        Log.d(LOG_TAG, "Scrolling to " + mPosition);
+        mScrollView.post(new Runnable() {
+            public void run() {
+                mScrollView.scrollTo(0, mPosition);
+            }
+        });
+//        mScrollView.scrollTo(0, mPosition);
+
         return rootView;
     }
 
@@ -195,7 +225,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             mPagerAdapter.clear();
             if (cursor.moveToFirst()) {
                 do {
-                    Log.d(LOG_TAG, "Adding video");
                     Video video = Video.fromCursor(cursor);
                     mPagerAdapter.add(video);
                 } while (cursor.moveToNext());
@@ -206,6 +235,14 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(MOVIE_KEY, mMovie);
+        outState.putInt(SCROLLVIEW_POSITION_KEY, mScrollView.getScrollY());
+        Log.d(LOG_TAG, "saving " + mScrollView.getScrollY());
+        super.onSaveInstanceState(outState);
     }
 
 

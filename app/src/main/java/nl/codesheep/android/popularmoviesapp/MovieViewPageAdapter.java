@@ -11,6 +11,8 @@ public class MovieViewPageAdapter extends FragmentPagerAdapter {
         super(fm);
     }
 
+
+
     @Override
     public CharSequence getPageTitle(int position) {
         switch (position) {
