@@ -3,7 +3,6 @@ package nl.codesheep.android.popularmoviesapp;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -17,7 +16,6 @@ public class TrailerPagerAdapter extends FragmentPagerAdapter {
     public TrailerPagerAdapter(FragmentManager fm) {
         super(fm);
         videos = new ArrayList<>();
-        Log.d(LOG_TAG, "I am a new adapter");
     }
 
     @Override

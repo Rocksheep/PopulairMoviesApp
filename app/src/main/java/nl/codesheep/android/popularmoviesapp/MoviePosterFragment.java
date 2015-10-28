@@ -75,8 +75,6 @@ public class MoviePosterFragment extends Fragment implements LoaderManager.Loade
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
-    
-
     @Override
     public void onResume() {
         super.onResume();

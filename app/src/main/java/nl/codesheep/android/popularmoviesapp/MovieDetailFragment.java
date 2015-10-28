@@ -107,7 +107,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         });
 
         mPager = (ViewPager) rootView.findViewById(R.id.detail_movie_trailer_pager);
-        mPagerAdapter = new TrailerPagerAdapter(getFragmentManager());
+        mPagerAdapter = new TrailerPagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mPagerAdapter);
 
         ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
