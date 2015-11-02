@@ -31,6 +31,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     private static final String MOVIE_KEY = "movie";
     private static final String SCROLLVIEW_POSITION_KEY = "scroll_position";
+    private static final String VIEWPAGER_POSITION_KEY = "pager_position";
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
     private static final int LOADER_MOVIE = 0;
@@ -39,6 +40,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private Movie mMovie;
     private ScrollView mScrollView;
     private int mPosition;
+    private int mPagerPosition;
 
     private LayoutInflater mLayoutInflater;
     private ViewGroup mReviewsParent;
@@ -64,6 +66,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPosition = 0;
+        mPagerAdapter = new TrailerPagerAdapter(getChildFragmentManager());
+
+        if (savedInstanceState != null) {
+            mPagerPosition = savedInstanceState.getInt(VIEWPAGER_POSITION_KEY);
+        }
     }
 
     @Override
@@ -128,7 +135,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         });
 
         mPager = (ViewPager) rootView.findViewById(R.id.detail_movie_trailer_pager);
-        mPagerAdapter = new TrailerPagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mPagerAdapter);
 
         ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
@@ -229,6 +235,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     mPagerAdapter.add(video);
                 } while (cursor.moveToNext());
             }
+            mPager.setCurrentItem(mPagerPosition);
         }
     }
 
@@ -241,6 +248,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(MOVIE_KEY, mMovie);
         outState.putInt(SCROLLVIEW_POSITION_KEY, mScrollView.getScrollY());
+        outState.putInt(VIEWPAGER_POSITION_KEY, mPager.getCurrentItem());
         Log.d(LOG_TAG, "saving " + mScrollView.getScrollY());
         super.onSaveInstanceState(outState);
     }
