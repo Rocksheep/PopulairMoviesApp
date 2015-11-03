@@ -22,4 +22,6 @@
     <string name="account_type">popularmoviesapp.codesheep.nl</string>
     <string name="content_authority">nl.codesheep.android.popularmoviesapp.data</string>
 
+    <string name="share">Share</string>
+
 </resources>

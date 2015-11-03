@@ -1,6 +1,7 @@
 package nl.codesheep.android.popularmoviesapp;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,8 +10,12 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -19,6 +24,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 import nl.codesheep.android.popularmoviesapp.data.FavoriteColumns;
 import nl.codesheep.android.popularmoviesapp.data.MovieProvider;
@@ -34,7 +41,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private static final String VIEWPAGER_POSITION_KEY = "pager_position";
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
-    private static final int LOADER_MOVIE = 0;
     private static final int LOADER_REVIEWS = 1;
     private static final int LOADER_VIDEOS = 2;
     private Movie mMovie;
@@ -47,6 +53,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     private ViewPager mPager;
     private TrailerPagerAdapter mPagerAdapter;
+    private ShareActionProvider mShareActionProvider;
+    private ArrayList<Video> mVideos;
 
     public static MovieDetailFragment newInstance (Movie movie) {
         MovieDetailFragment detailFragment = new MovieDetailFragment();
@@ -65,8 +73,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mPosition = 0;
         mPagerAdapter = new TrailerPagerAdapter(getChildFragmentManager());
+        mVideos = new ArrayList<>();
 
         if (savedInstanceState != null) {
             mPagerPosition = savedInstanceState.getInt(VIEWPAGER_POSITION_KEY);
@@ -74,34 +84,57 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_detail, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_item_share) {
+            Intent shareIntent = createShareIntent();
+            startActivity(Intent.createChooser(shareIntent, "Share"));
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private Intent createShareIntent() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setType("text/plain");
+
+        String shareText = mMovie.getTitle();
+        if (mVideos.size() > 0) {
+            shareText += " | Trailer: " + mVideos.get(0).getVideoUrl();
+        }
+        Log.d(LOG_TAG, "Setting share text to " + shareText);
+        intent.putExtra(Intent.EXTRA_TEXT, shareText);
+        return intent;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-        Movie movie = null;
-
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(MOVIE_KEY)) {
-                movie = savedInstanceState.getParcelable(MOVIE_KEY);
-            }
-            if (savedInstanceState.containsKey(SCROLLVIEW_POSITION_KEY)) {
-                mPosition = savedInstanceState.getInt(SCROLLVIEW_POSITION_KEY);
-                Log.d(LOG_TAG, "Scroll position = " + mPosition);
-            }
+            mMovie = savedInstanceState.getParcelable(MOVIE_KEY);
+            mPosition = savedInstanceState.getInt(SCROLLVIEW_POSITION_KEY);
         }
         else {
             Bundle bundle = getArguments();
             if (bundle != null) {
-                movie = bundle.getParcelable(MOVIE_KEY);
+                mMovie = bundle.getParcelable(MOVIE_KEY);
             } else {
                 Bundle extras = getActivity().getIntent().getExtras();
-                movie = extras.getParcelable(MOVIE_KEY);
+                mMovie = extras.getParcelable(MOVIE_KEY);
             }
         }
-        if (movie == null) {
+        if (mMovie == null) {
             return rootView;
         }
-        mMovie = movie;
+
         final FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.favorite_fab);
         if (mMovie.isFavorite()) {
             fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_white_48dp));
@@ -145,28 +178,28 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 rootView.findViewById(R.id.detail_movie_cover_image_view);
 
         Picasso.with(getActivity())
-                .load(MovieService.COVER_URL + movie.getCoverUrl())
+                .load(MovieService.COVER_URL + mMovie.getCoverUrl())
                 .placeholder(R.drawable.backdrop_placeholder).into(coverImageView);
 
         ImageView posterImageView = (ImageView)
                 rootView.findViewById(R.id.detail_movie_poster_image_view);
         Picasso.with(getActivity())
-                .load(MovieService.POSTER_URL + movie.getPosterUrl())
+                .load(MovieService.POSTER_URL + mMovie.getPosterUrl())
                 .placeholder(R.drawable.placeholder)
                 .into(posterImageView);
 
         TextView titleTextView = (TextView) rootView.findViewById(R.id.detail_movie_title);
-        titleTextView.setText(movie.getTitle());
+        titleTextView.setText(mMovie.getTitle());
 
         TextView releaseDateTextView = (TextView)
                 rootView.findViewById(R.id.detail_movie_release_date);
-        releaseDateTextView.setText(movie.getReleaseDate());
+        releaseDateTextView.setText(mMovie.getReleaseDate());
 
         TextView synopsisTextView = (TextView) rootView.findViewById(R.id.detail_movie_synopsis);
-        synopsisTextView.setText(movie.getSynopsis());
+        synopsisTextView.setText(mMovie.getSynopsis());
 
         RatingBar ratingBar = (RatingBar) rootView.findViewById(R.id.detail_movie_rating);
-        ratingBar.setRating((float) movie.getRating() / 2);
+        ratingBar.setRating((float) mMovie.getRating() / 2);
 
         getLoaderManager().initLoader(LOADER_REVIEWS, null, this);
         getLoaderManager().initLoader(LOADER_VIDEOS, null, this);
@@ -178,7 +211,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 mScrollView.scrollTo(0, mPosition);
             }
         });
-//        mScrollView.scrollTo(0, mPosition);
 
         return rootView;
     }
@@ -229,10 +261,12 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         if (loader.getId() == LOADER_VIDEOS) {
             mPagerAdapter.clear();
+            mVideos.clear();
             if (cursor.moveToFirst()) {
                 do {
                     Video video = Video.fromCursor(cursor);
                     mPagerAdapter.add(video);
+                    mVideos.add(video);
                 } while (cursor.moveToNext());
             }
             mPager.setCurrentItem(mPagerPosition);

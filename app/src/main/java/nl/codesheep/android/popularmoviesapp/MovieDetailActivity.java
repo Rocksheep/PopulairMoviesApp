@@ -3,7 +3,6 @@ package nl.codesheep.android.popularmoviesapp;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 
 public class MovieDetailActivity extends AppCompatActivity {
@@ -28,6 +27,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             NavUtils.navigateUpFromSameTask(this);
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
