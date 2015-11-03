@@ -255,6 +255,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 View view = mLayoutInflater.inflate(R.layout.review, mReviewsParent, false);
                 TextView textView = (TextView) view.findViewById(R.id.review_text_view);
                 textView.setText(review.content);
+                ((TextView) view.findViewById(R.id.review_author_text_view)).setText(review.author);
                 mReviewsParent.addView(view);
             } while (cursor.moveToNext());
         }
