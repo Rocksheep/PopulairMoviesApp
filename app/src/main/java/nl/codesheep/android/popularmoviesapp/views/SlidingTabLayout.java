@@ -2,6 +2,7 @@ package nl.codesheep.android.popularmoviesapp.views;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -201,7 +202,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
             tabTitleView.setText(adapter.getPageTitle(i));
             tabView.setOnClickListener(tabClickListener);
-            tabTitleView.setTextColor(getResources().getColor(R.color.accent));
+            tabTitleView.setTextColor(ContextCompat.getColor(getContext(), R.color.accent));
 
             mTabStrip.addView(tabView);
         }

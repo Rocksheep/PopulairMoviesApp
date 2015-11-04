@@ -23,14 +23,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="nl.codesheep.android.popularmoviesapp.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName="nl.codesheep.android.popularmoviesapp.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.codesheep.android.popularmoviesapp.MainActivity" />
-        </activity>
-        <activity
             android:name="nl.codesheep.android.popularmoviesapp.MovieDetailActivity"
             android:label="@string/title_activity_movie_detail"
             android:parentActivityName="nl.codesheep.android.popularmoviesapp.MainActivity" >

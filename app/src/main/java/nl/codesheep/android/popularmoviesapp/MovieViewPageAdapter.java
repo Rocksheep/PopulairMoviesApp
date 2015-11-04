@@ -1,5 +1,6 @@
 package nl.codesheep.android.popularmoviesapp;
 
+import android.content.Context;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
@@ -7,23 +8,20 @@ import nl.codesheep.android.popularmoviesapp.data.MovieColumns;
 
 public class MovieViewPageAdapter extends FragmentPagerAdapter {
 
-    public MovieViewPageAdapter(FragmentManager fm) {
+    private Context mContext;
+
+    public MovieViewPageAdapter(Context context, FragmentManager fm) {
         super(fm);
+        mContext = context;
     }
-
-
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position) {
-            case 0:
-                return "Popular";
-            case 1:
-                return "Highly rated";
-            case 2:
-                return "Favorites";
+        String[] pageTitles = mContext.getResources().getStringArray(R.array.main_tab_menu_values);
+        if (position < pageTitles.length) {
+            return pageTitles[position];
         }
-        return "Item " + (position + 1);
+        return null;
     }
 
     @Override

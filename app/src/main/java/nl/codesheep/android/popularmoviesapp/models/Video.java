@@ -13,8 +13,8 @@ public class Video {
     public String site;
 
     public interface QUALITY {
-        public String HQ = "hqdefault.jpg";
-        public String MAX_RES = "maxresdefault.jpg";
+        String HQ = "hqdefault.jpg";
+        String MAX_RES = "maxresdefault.jpg";
     }
 
     private static final String IMAGE_URL =  "http://img.youtube.com/vi/";

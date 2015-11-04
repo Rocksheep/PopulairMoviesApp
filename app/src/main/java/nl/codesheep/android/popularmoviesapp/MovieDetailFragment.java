@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
@@ -94,7 +95,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         int id = item.getItemId();
         if (id == R.id.menu_item_share) {
             Intent shareIntent = createShareIntent();
-            startActivity(Intent.createChooser(shareIntent, "Share"));
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.share_title)));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -104,11 +105,17 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setType("text/plain");
 
-        String shareText = mMovie.getTitle();
+        String shareText;
         if (mVideos.size() > 0) {
-            shareText += " | Trailer: " + mVideos.get(0).getVideoUrl();
+            shareText = String.format(
+                    getString(R.string.share_with_trailer_text),
+                    mMovie.getTitle(),
+                    mVideos.get(0).getVideoUrl());
         }
-        Log.d(LOG_TAG, "Setting share text to " + shareText);
+        else {
+            shareText = String.format(getString(R.string.share_text), mMovie.getTitle());
+        }
+        Log.d(LOG_TAG,shareText);
         intent.putExtra(Intent.EXTRA_TEXT, shareText);
         return intent;
     }
@@ -137,10 +144,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         final FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.favorite_fab);
         if (mMovie.isFavorite()) {
-            fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_white_48dp));
+
+            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favorite_white_48dp));
         }
         else {
-            fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_border_white_48dp));
+            fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favorite_border_white_48dp));
         }
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -152,7 +160,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             FavoriteColumns.MOVIE_KEY + " = ?",
                             new String[]{Long.toString(mMovie.getMovieId())}
                     );
-                    fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_border_white_48dp));
+                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favorite_border_white_48dp));
                     mMovie.setIsFavorite(false);
                 } else {
                     ContentValues contentValues = new ContentValues();
@@ -161,7 +169,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             MovieProvider.Favorites.FAVORITES,
                             contentValues
                     );
-                    fab.setImageDrawable(getActivity().getResources().getDrawable(R.drawable.ic_favorite_white_48dp));
+                    fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favorite_white_48dp));
                     mMovie.setIsFavorite(true);
                 }
             }

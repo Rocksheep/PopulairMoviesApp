@@ -27,7 +27,6 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp">
                 <TextView
-                    android:text="Jurassic World"
                     android:id="@+id/movie_poster_title_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -35,7 +34,6 @@
                     android:textSize="16sp"/>
                 <TextView
                     android:id="@+id/movie_poster_rating_text_view"
-                    android:text="4.3*"
                     android:textColor="@android:color/black"
                     android:textSize="12sp"
                     android:layout_width="match_parent"
