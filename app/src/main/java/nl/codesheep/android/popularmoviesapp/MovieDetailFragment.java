@@ -11,7 +11,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -54,7 +53,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     private ViewPager mPager;
     private TrailerPagerAdapter mPagerAdapter;
-    private ShareActionProvider mShareActionProvider;
     private ArrayList<Video> mVideos;
 
     public static MovieDetailFragment newInstance (Movie movie) {
@@ -74,13 +72,29 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+
         mPosition = 0;
         mPagerAdapter = new TrailerPagerAdapter(getChildFragmentManager());
         mVideos = new ArrayList<>();
 
         if (savedInstanceState != null) {
             mPagerPosition = savedInstanceState.getInt(VIEWPAGER_POSITION_KEY);
+            mMovie = savedInstanceState.getParcelable(MOVIE_KEY);
+            mPosition = savedInstanceState.getInt(SCROLLVIEW_POSITION_KEY);
+        }
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            mMovie = bundle.getParcelable(MOVIE_KEY);
+        }
+
+        Bundle extras = getActivity().getIntent().getExtras();
+        if (extras != null) {
+            mMovie = extras.getParcelable(MOVIE_KEY);
+        }
+
+        if (mMovie != null) {
+            setHasOptionsMenu(true);
         }
     }
 
@@ -123,26 +137,15 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+        mScrollView = (ScrollView) inflater.inflate(R.layout.fragment_movie_detail, container, false);
+        mPager = (ViewPager) mScrollView.findViewById(R.id.detail_movie_trailer_pager);
+        mPager.setAdapter(mPagerAdapter);
 
-        if (savedInstanceState != null) {
-            mMovie = savedInstanceState.getParcelable(MOVIE_KEY);
-            mPosition = savedInstanceState.getInt(SCROLLVIEW_POSITION_KEY);
-        }
-        else {
-            Bundle bundle = getArguments();
-            if (bundle != null) {
-                mMovie = bundle.getParcelable(MOVIE_KEY);
-            } else {
-                Bundle extras = getActivity().getIntent().getExtras();
-                mMovie = extras.getParcelable(MOVIE_KEY);
-            }
-        }
         if (mMovie == null) {
-            return rootView;
+            return mScrollView;
         }
 
-        final FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.favorite_fab);
+        final FloatingActionButton fab = (FloatingActionButton) mScrollView.findViewById(R.id.favorite_fab);
         if (mMovie.isFavorite()) {
 
             fab.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_favorite_white_48dp));
@@ -175,52 +178,47 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             }
         });
 
-        mPager = (ViewPager) rootView.findViewById(R.id.detail_movie_trailer_pager);
-        mPager.setAdapter(mPagerAdapter);
-
-        ViewGroup reviewContainer = (ViewGroup) rootView.findViewById(R.id.review_container);
+        ViewGroup reviewContainer = (ViewGroup) mScrollView.findViewById(R.id.review_container);
         mLayoutInflater = inflater;
         mReviewsParent = reviewContainer;
 
         ImageView coverImageView = (ImageView)
-                rootView.findViewById(R.id.detail_movie_cover_image_view);
+                mScrollView.findViewById(R.id.detail_movie_cover_image_view);
 
         Picasso.with(getActivity())
                 .load(MovieService.COVER_URL + mMovie.getCoverUrl())
                 .placeholder(R.drawable.backdrop_placeholder).into(coverImageView);
 
         ImageView posterImageView = (ImageView)
-                rootView.findViewById(R.id.detail_movie_poster_image_view);
+                mScrollView.findViewById(R.id.detail_movie_poster_image_view);
         Picasso.with(getActivity())
                 .load(MovieService.POSTER_URL + mMovie.getPosterUrl())
                 .placeholder(R.drawable.placeholder)
                 .into(posterImageView);
 
-        TextView titleTextView = (TextView) rootView.findViewById(R.id.detail_movie_title);
+        TextView titleTextView = (TextView) mScrollView.findViewById(R.id.detail_movie_title);
         titleTextView.setText(mMovie.getTitle());
 
         TextView releaseDateTextView = (TextView)
-                rootView.findViewById(R.id.detail_movie_release_date);
+                mScrollView.findViewById(R.id.detail_movie_release_date);
         releaseDateTextView.setText(mMovie.getReleaseDate());
 
-        TextView synopsisTextView = (TextView) rootView.findViewById(R.id.detail_movie_synopsis);
+        TextView synopsisTextView = (TextView) mScrollView.findViewById(R.id.detail_movie_synopsis);
         synopsisTextView.setText(mMovie.getSynopsis());
 
-        RatingBar ratingBar = (RatingBar) rootView.findViewById(R.id.detail_movie_rating);
+        RatingBar ratingBar = (RatingBar) mScrollView.findViewById(R.id.detail_movie_rating);
         ratingBar.setRating((float) mMovie.getRating() / 2);
 
         getLoaderManager().initLoader(LOADER_REVIEWS, null, this);
         getLoaderManager().initLoader(LOADER_VIDEOS, null, this);
 
-        mScrollView = (ScrollView) rootView;
-        Log.d(LOG_TAG, "Scrolling to " + mPosition);
         mScrollView.post(new Runnable() {
             public void run() {
                 mScrollView.scrollTo(0, mPosition);
             }
         });
 
-        return rootView;
+        return mScrollView;
     }
 
     @Override
